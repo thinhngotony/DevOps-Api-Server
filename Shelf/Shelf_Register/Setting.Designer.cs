@@ -34,6 +34,7 @@ namespace Shelf_Register
             // 
             // settingLayer
             // 
+            this.settingLayer.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.settingLayer.ColumnCount = 8;
             this.settingLayer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
             this.settingLayer.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
@@ -52,6 +53,7 @@ namespace Shelf_Register
             this.settingLayer.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.settingLayer.Size = new System.Drawing.Size(1008, 729);
             this.settingLayer.TabIndex = 0;
+            this.settingLayer.Click += new System.EventHandler(this.settingLayer_Click);
             // 
             // Setting
             // 
@@ -68,6 +70,6 @@ namespace Shelf_Register
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel settingLayer;
+        public System.Windows.Forms.TableLayoutPanel settingLayer;
     }
 }
