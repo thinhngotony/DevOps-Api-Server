@@ -1,0 +1,8 @@
+2022/08/10 17:36:29 [ERROR] Error 1136: Column count doesn't match value count at row 1 
+	[C:/Users/cuong/Desktop/Projects/visual-japan/rf_tag_showroom/DataLinkJob/src/GetBestSellerJob/03_InsertToLocalBestSeller.go:29]    main.InsertToLocalBestSeller
+	[C:/Users/cuong/Desktop/Projects/visual-japan/rf_tag_showroom/DataLinkJob/src/GetBestSellerJob/main.go:67]    main.main
+2022/08/10 17:40:43 [ERROR] Error 1136: Column count doesn't match value count at row 1 
+	[C:/Users/cuong/Desktop/Projects/visual-japan/rf_tag_showroom/DataLinkJob/src/GetBestSellerJob/03_InsertToLocalBestSeller.go:29]    main.InsertToLocalBestSeller
+	[C:/Users/cuong/Desktop/Projects/visual-japan/rf_tag_showroom/DataLinkJob/src/GetBestSellerJob/main.go:67]    main.main
+2022/08/10 17:47:00 ====GetBestSellerJob end====
+2022/08/11 09:48:23 ====GetBestSellerJob end====

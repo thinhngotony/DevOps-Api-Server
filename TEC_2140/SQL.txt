@@ -1,0 +1,35 @@
+TRUNCATE TABLE shelf_calc_location;
+UPDATE drfid_raw_data 
+SET m_10 = CONV( drd_rssi, 16, 10 ),
+n_10 = CONV( drd_anten_no, 2, 10 );
+
+INSERT INTO shelf_calc_location ( shelf_no, EPC, `ROW`, col ) (
+	SELECT
+		ma.shelf_no,
+		EPC,
+		ma.ROW,
+		ma.col + ma.direction * (
+		IF
+			(
+				slc.n_count % ma.col_size > 0,
+				slc.n_count / ma.col_size + 1,
+				slc.n_count / ma.col_size 
+			)) AS col 
+	FROM
+		(
+		SELECT
+			sl.drd_anten_no AS n,
+			ROW_NUMBER() OVER ( PARTITION BY sl.drd_anten_no ORDER BY sl.drd_rssi DESC ) AS n_count,
+			sl.drd_rssi AS m_10,
+			sl.drd_rfid_cd AS EPC 
+		FROM
+			smart_shelf.drfid_raw_data AS sl,
+			( SELECT drd_rfid_cd AS EPC, MAX( drd_rssi ) AS m_10 FROM drfid_raw_data GROUP BY 1 ) AS sl_max 
+		WHERE
+			sl.drd_rfid_cd = sl_max.EPC 
+			AND sl.drd_rssi = sl_max.m_10 
+		GROUP BY
+			sl.drd_rfid_cd 
+		) AS slc
+	LEFT JOIN MST_ANTENA ma ON ( slc.n = ma.antena_no ) 
+	)

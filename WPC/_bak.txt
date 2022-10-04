@@ -1,0 +1,34 @@
+CREATE PROCEDURE `new_procedure` ()
+BEGIN
+
+UPDATE smart_shelf.shelf_location
+   SET m_10 = CONV(m, 16, 10)
+      ,n_10 = CONV(n, 16, 10);
+
+
+Truncate smart_shelf.shelf_calc_location;
+
+insert smart_shelf.shelf_calc_location 
+(shelf_no,
+EPC,
+row,
+col)
+
+(
+SELECT ma.shelf_no, slc.EPC, ma.row row, ma.col + 
+ma.direction* (if(slc.n_count%ma.col_size>0, slc.n_count/ma.col_size+1,slc.n_count/ma.col_size)) as col
+FROM
+(SELECT sl.n, 
+ROW_NUMBER() OVER (PARTITION BY sl.n  ORDER BY sl.m_10 DESC) as n_count
+, sl.m_10, sl.EPC
+FROM smart_shelf.shelf_location as sl
+, (SELECT EPC as EPC, MAX(m_10) as m_10 FROM shelf_location
+GROUP BY EPC) AS sl_max
+WHERE sl.EPC = sl_max.EPC 
+and sl.m_10 = sl_max.m_10
+) AS slc 
+
+left join MST_ANTENA ma 
+on (slc.n = ma.antena_no AND ma.shelf_no = parameter_input ) 
+)
+END
