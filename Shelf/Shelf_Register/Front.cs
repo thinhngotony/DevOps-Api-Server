@@ -1080,7 +1080,6 @@ namespace Shelf_Register
                 else
                 {
                     Console.WriteLine(result);
-
                 }
 
                 
@@ -4762,16 +4761,47 @@ namespace Shelf_Register
                 {
                     multiConnections = new SimpleTcpClient(Session.TcpHost[i]);
                     multiConnections.Events.Connected += Connected;
-                    multiConnections.Events.Disconnected += Disconnected;
+                    //multiConnections.Events.Disconnected += Disconnected;
                     multiConnections.Events.DataReceived += DataReceived;
-                    multiConnections.Events.DataSent += Events_DataSent;
+                    //multiConnections.Events.DataSent += Events_DataSent;
                     multiConnections.Connect();
+                    multiConnections.Send("ACTION_REGISTER_SHELF_END");
                     multiConnections.Send("ACTION_REGISTER_SHELF_START");
                     connectedTcpHosts.Add(multiConnections);
                 }
                 result = true;
             }
             catch (Exception )
+            {
+                Console.WriteLine("Bug is here");
+                //log error
+            }
+
+            return result;
+        }
+
+        static bool CloseConnect()
+        {
+            bool result = false;
+            try
+            {
+                // instantiate
+
+                int temp = Session.TcpHost.Count();
+                for (int i = 0; i < temp; i++)
+                {
+                    multiConnections = new SimpleTcpClient(Session.TcpHost[i]);
+                    multiConnections.Events.Connected += Connected;
+                    multiConnections.Events.DataReceived += DataReceived;
+                    multiConnections.Connect();
+                    multiConnections.Send("ACTION_REGISTER_SHELF_END");
+                    multiConnections.Disconnect();
+
+
+                }
+                result = true;
+            }
+            catch (Exception)
             {
                 Console.WriteLine("Bug is here");
                 //log error
@@ -4849,24 +4879,35 @@ namespace Shelf_Register
             btnScan.Text = "SCANNING..." + "\r\n" + Session.time_set_location.ToString() + "s";
             if (Session.time_set_location == 0)
             {
-                //Send stop singal here => Need Hanle exeption when not connect
+                //Send stop singal here => Need Handle exeption when not connect
                 Wait wait = new Wait();
                 wait.Visible = true;
-                int temp = Session.TcpHost.Count();
-                for (int i = 0; i < temp; i++)
+
+
+                //OLD DISCONNECT - BUG
+                //int temp = Session.TcpHost.Count();
+                //for (int i = 0; i < temp; i++)
+                //{
+                //    if (connectedTcpHosts[i].IsConnected)
+                //    {
+                //        connectedTcpHosts[i].Send("ACTION_REGISTER_SHELF_END");
+                //        connectedTcpHosts[i].Disconnect();
+                //        messageFromApp.Text += String.Format("{0} Stop shelf {1} complete \n", DateTime.Now.ToString("hh:mm:ss "), connectedTcpHosts[i].ServerIpPort);
+                //    }
+
+                //}
+                bool result = CloseConnect();
+
+                if (result == true)
                 {
-                    if (connectedTcpHosts[i].IsConnected)
-                    {
-                        connectedTcpHosts[i].Send("ACTION_REGISTER_SHELF_END");
-                        connectedTcpHosts[i].Disconnect();
-                        messageFromApp.Text += String.Format("{0} Stop shelf {1} complete \n", DateTime.Now.ToString("hh:mm:ss "), connectedTcpHosts[i].ServerIpPort);
-                    }
+                    messageFromApp.Text += String.Format("{0}Stop shelf complete \n", DateTime.Now.ToString("hh:mm:ss "));
 
                 }
+                else
+                {
+                    messageFromApp.Text += String.Format("{0}Failed to stop shelf \n", DateTime.Now.ToString("hh:mm:ss "));
 
-                Session.time_set_location = (int)Int64.Parse(txtLocation.Text);
-                api_message = " Set location complete";
-                messageFromApp.Text += DateTime.Now.ToString("hh:mm:ss") + api_message + "\n";
+                }
 
 
                 locationTimer.Stop();
@@ -4901,7 +4942,6 @@ namespace Shelf_Register
                     else
                     {
                         Task.Run(() => ApiGetDataFromBQ_Sync(key, Session.productPos[key].Jancode)).Wait();
-                        //Task.Run(() => ApiGetImage_Sync(key, Session.productPos[key].isbn)).Wait();
                         Task.Run(() => ApiGetImageLocal(key, Session.productPos[key].Jancode)).Wait();
                     }
 
@@ -4910,9 +4950,16 @@ namespace Shelf_Register
 
                 //Insert data got
                 Task.Run(() => ApiInsertMoreInfoSmartShelf()).Wait();
-                updateView();
+                //Reload data to screen
+                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait();
+
+                //updateView();
                 updatePictureBox();
                 updateName_Scan();
+
+                Session.time_set_location = (int)Int64.Parse(txtLocation.Text);
+                api_message = " Set location complete";
+                messageFromApp.Text += DateTime.Now.ToString("hh:mm:ss") + api_message + "\n";
                 wait.Visible = false;
             }
             

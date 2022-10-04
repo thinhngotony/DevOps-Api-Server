@@ -195,7 +195,7 @@ namespace Shelf_Register
             // messageFromApp
             // 
             this.messageFromApp.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.messageFromApp.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.messageFromApp.Font = new System.Drawing.Font("Arial", 6.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.messageFromApp.Location = new System.Drawing.Point(790, 664);
             this.messageFromApp.Name = "messageFromApp";
             this.messageFromApp.ReadOnly = true;
