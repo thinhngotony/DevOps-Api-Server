@@ -646,7 +646,9 @@ func SetSmartSelfLocation(db *sql.DB) (bool, error) {
 				sl.drd_anten_no AS n,
 				ROW_NUMBER() OVER ( PARTITION BY sl.drd_anten_no ORDER BY sl.drd_rssi DESC ) AS n_count,
 				sl.drd_rssi AS m_10,
-				sl.drd_rfid_cd AS EPC 
+				sl.drd_rfid_cd AS EPC,
+				sl.drd_shelf_no as shelf_no
+
 			FROM
 				smart_shelf.drfid_raw_data AS sl,
 				( SELECT drd_rfid_cd AS EPC, MAX( drd_rssi ) AS m_10 FROM drfid_raw_data GROUP BY 1 ) AS sl_max 
@@ -656,7 +658,7 @@ func SetSmartSelfLocation(db *sql.DB) (bool, error) {
 			GROUP BY
 				sl.drd_rfid_cd 
 			) AS slc
-		LEFT JOIN MST_ANTENA ma ON ( slc.n = ma.antena_no ) 
+		LEFT JOIN MST_ANTENA ma ON ( slc.n = ma.antena_no AND ma.shelf_no = slc.shelf_no) 
 		)`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
@@ -683,7 +685,7 @@ func SetSmartSelfLocation(db *sql.DB) (bool, error) {
 
 func DeleteInvalidRecord(db *sql.DB) (bool, error) {
 
-	query := `DELETE FROM shelf_calc_location WHERE col > 7 or col < 0;`
+	query := `DELETE FROM shelf_calc_location WHERE col > 7 or col <= 0;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 	tx, err := db.BeginTx(ctx, nil)

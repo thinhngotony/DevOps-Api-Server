@@ -4916,8 +4916,8 @@ namespace Shelf_Register
                 btnScan.BackColor = Color.RoyalBlue;
                 string shelfName = cbShelf.Text;
                 Task.Run(() => ApiResetLocation()).Wait();
-                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait();
-                Task.Run(() => ApiRFIDtoJan_Sync()).Wait();
+                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait(); //Get RFID row col
+                Task.Run(() => ApiRFIDtoJan_Sync()).Wait(); // => Tìm JAN
 
                 foreach (string key in Session.productPos.Keys)
                 {
@@ -4952,9 +4952,9 @@ namespace Shelf_Register
                 //Insert data got
                 Task.Run(() => ApiInsertMoreInfoSmartShelf()).Wait();
                 //Reload data to screen
-                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait();
+                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait(); //Get RFID row col link image, pro....
 
-                //updateView();
+                updateView();
                 updatePictureBox();
                 updateName_Scan();
 
