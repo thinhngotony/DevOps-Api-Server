@@ -134,5 +134,7 @@ namespace Shelf_Register
 
         // Variable for Setting.cs
         // public static List<Panel> panel_List = new List<Panel>();
+        public static string nameOfShelf = "";
+
     }
 }

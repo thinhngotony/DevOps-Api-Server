@@ -53,7 +53,7 @@ namespace Shelf_Register
             this.settingLayer.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.settingLayer.Size = new System.Drawing.Size(1008, 729);
             this.settingLayer.TabIndex = 0;
-            this.settingLayer.Click += new System.EventHandler(this.settingLayer_Click);
+            //this.settingLayer.Click += new System.EventHandler(this.settingLayer_Click);
             // 
             // Setting
             // 

@@ -306,10 +306,13 @@ func SetSmartSelfLocation(c *gin.Context) {
 		if isSuccess, _ := db_client.ConvertToDecimalSmartSelfLocation(db); isSuccess {
 			if isSuccess, _ := db_client.SetAverageValueForRSSI(db); isSuccess {
 				if isSuccess, _ := db_client.SetSmartSelfLocation(db); isSuccess {
-					c.JSON(http.StatusOK, gin.H{
-						"code":    utils.SUCCESSFULLY_CODE,
-						"message": "登録に成功しました。",
-					})
+					if isSuccess, _ := db_client.DeleteInvalidRecord(db); isSuccess {
+						c.JSON(http.StatusOK, gin.H{
+							"code":    utils.SUCCESSFULLY_CODE,
+							"message": "登録に成功しました。",
+						})
+					}
+
 				}
 			}
 		}

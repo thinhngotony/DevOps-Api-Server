@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -48,7 +51,6 @@ namespace Shelf_Register
             {
                 if (checkItem.Checked)
                 {
-                    MessageBox.Show(checkItem.Text);
                     switch (checkItem.Text)
                     {
                         case "ANTENA 1":
@@ -102,8 +104,11 @@ namespace Shelf_Register
                     if (int.Parse(pic.Name.Substring(2, 1)) >= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
                     {
                         pic.Load("selected.png");
+                        //Call API
+                       
+
                     }
-                    
+
                 }
             }
         }
@@ -128,21 +133,31 @@ namespace Shelf_Register
         {
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
-                //ApiUpdatePositionMSTAntena(checkItem.Name, ); 
+                foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+                { 
+                    if ( pic.ImageLocation == "selected.png") 
+                    {
+                        for (var scan_col_start = 0; scan_col_start < 7; scan_col_start++) 
+                        {
+                            if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start) 
+                            {
+                               
+                            }
+                        }
+                    }
+                }
+                    
             }
                 
         }
 
-        private static void ApiUpdatePositionMSTAntena(string Antena, int Scan_col_start, int Scan_col_end)
-        {
-            //string shelfNo = Front.cbShelf.SelectedItem.ToString();
+        //private static void ApiUpdatePositionMSTAntena(string shelf_no, string antena, int scan_col_start, int scan_col_end)
+        //{
+        //    //string shelfNo = Front.cbShelf.SelectedItem.ToString();
 
-        }
+        //}
 
-        private void settingLayer_Click(object sender, EventArgs e)
-        {
 
-        }
 
         private void init()
         {

@@ -243,3 +243,4 @@ C:\Users\Tony\Desktop\New\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\Sys
 C:\Users\Tony\Desktop\New\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.Fody.CopyLocal.cache
 C:\Users\Tony\Desktop\New\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.Setting.resources
 C:\Users\Tony\Desktop\New\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.SettingOLD.resources
+C:\Users\Tony\Desktop\New\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\selected.png

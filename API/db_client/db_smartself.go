@@ -681,6 +681,32 @@ func SetSmartSelfLocation(db *sql.DB) (bool, error) {
 	return true, err
 }
 
+func DeleteInvalidRecord(db *sql.DB) (bool, error) {
+
+	query := `DELETE FROM shelf_calc_location WHERE col > 7 or col < 0;`
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		// Incase we find any error in the query execution, rollback the transaction
+		log.Printf("Error %s when finding rows affected", err)
+		tx.Rollback()
+		return false, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Error %s when finding rows affected", err)
+		return false, err
+	}
+
+	return true, err
+}
+
 func SetSmartSelfLocation_OLD(db *sql.DB) (bool, error) {
 
 	query := `INSERT INTO shelf_calc_location ( shelf_no, EPC, ROW, col ) (
