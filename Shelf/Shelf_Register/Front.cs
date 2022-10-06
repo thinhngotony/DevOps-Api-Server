@@ -84,7 +84,7 @@ namespace Shelf_Register
 
             Task.Run(() => ApiGetSmartShelfNames()).Wait();
             cbShelf.DataSource = Session.smart_shelf_names;
-            cbShelf.SelectedItem = "SHELF 2";
+            cbShelf.SelectedItem = "SHELF 1";
             txtInterval.Text = Session.time_check.ToString();
             txtLocation.Text = Session.time_set_location.ToString();
 
@@ -4757,7 +4757,7 @@ namespace Shelf_Register
             {
                 // instantiate
 
-                int temp = Session.TcpHost.Count();
+                 int temp = Session.TcpHost.Count();
                 for (int i = 0; i < temp; i++)
                 {
                     multiConnections = new SimpleTcpClient(Session.TcpHost[i]);
@@ -4769,6 +4769,7 @@ namespace Shelf_Register
                     multiConnections.Send("ACTION_REGISTER_SHELF_END");
                     multiConnections.Send("ACTION_REGISTER_SHELF_START");
                     connectedTcpHosts.Add(multiConnections);
+                    
                 }
                 result = true;
             }
@@ -4948,13 +4949,17 @@ namespace Shelf_Register
 
 
                 }
-
+                //Check bug
+                updateView();
                 //Insert data got
                 Task.Run(() => ApiInsertMoreInfoSmartShelf()).Wait();
                 //Reload data to screen
-                Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait(); //Get RFID row col link image, pro....
+                //Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait(); //Get RFID row col link image, pro....
 
+                //Check bug updateView 2 lần
                 updateView();
+                //Check bug
+
                 updatePictureBox();
                 updateName_Scan();
 

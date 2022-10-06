@@ -1105,6 +1105,7 @@ namespace Shelf_Register
             this.btnMore.TabIndex = 72;
             this.btnMore.Text = "SETTING";
             this.btnMore.UseVisualStyleBackColor = false;
+            this.btnMore.Visible = false;
             this.btnMore.Click += new System.EventHandler(this.btnMore_Click);
             // 
             // Front
