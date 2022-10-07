@@ -84,7 +84,7 @@ namespace Shelf_Register
 
             Task.Run(() => ApiGetSmartShelfNames()).Wait();
             cbShelf.DataSource = Session.smart_shelf_names;
-            cbShelf.SelectedItem = "SHELF 1";
+            cbShelf.SelectedItem = "SHELF 2";
             txtInterval.Text = Session.time_check.ToString();
             txtLocation.Text = Session.time_set_location.ToString();
 
@@ -303,7 +303,7 @@ namespace Shelf_Register
                     }
                     else
                     {
-                        string url = GetImage(Session.productPos[pic.Name].link_image, Session.productPos[pic.Name].Jancode);
+                        string url = GetImage(Session.productPos[pic.Name].link_image, Session.productPos[pic.Name].RFIDcode);
                         Session.productPos[pic.Name].link_image = url;
                         pic.Load(url);
                     }
@@ -566,7 +566,7 @@ namespace Shelf_Register
             }
         }
 
-        public string GetImage(string data, string jancode)
+        public string GetImage(string data, string rfid)
         {
             //Check is base64
             if (!isBase64(data))
@@ -584,7 +584,7 @@ namespace Shelf_Register
             using (MemoryStream ms = new MemoryStream(bytes))
             {
                 image = Image.FromStream(ms);
-                string name = Path.Combine(Session.static_img_folder, jancode + ".jpg");
+                string name = Path.Combine(Session.static_img_folder, rfid + ".jpg");
                 if (File.Exists(name))
                 {
                     File.Delete(name);
@@ -637,7 +637,7 @@ namespace Shelf_Register
 
                             // new 20220910: get product from local file
                             // save base64 image to local
-                            string name = Path.Combine(Session.static_img_folder, Session.productPos[key].Jancode + ".jpg");
+                            string name = Path.Combine(Session.static_img_folder, Session.productPos[key].RFIDcode + ".jpg");
 
                             File.WriteAllBytes(name, Convert.FromBase64String((string)api_result["base64"]));
                             ShelfProduct new_product = new ShelfProduct();
@@ -671,7 +671,8 @@ namespace Shelf_Register
                             // new 20220910: get product from local file
                             // download image to local and update CSV file
                             string url = (string)api_result["cover"];
-                            string name = Path.Combine(Session.static_img_folder, url.Split('/').Last());
+                            //string name = Path.Combine(Session.static_img_folder, url.Split('/').Last());
+                            string name = Path.Combine(Session.static_img_folder, string.Format("{0}.jpg", Session.productPos[key].RFIDcode));
                             bool result_download = ShelfLocal.DownloadImage(url, name, ImageFormat.Jpeg);
                             Console.WriteLine("Download image is sucess: " + result_download);
 
@@ -911,14 +912,16 @@ namespace Shelf_Register
                         //Nếu link Online OK
                         //Nếu link local => Covert sang base64
                         string base64_covert = "";
-                        if (CheckValidUrlNoLocal(Session.productPos[pic.Name].link_image))
-                        {
-                            base64_covert = Session.productPos[pic.Name].link_image;
-                        }
-                        else if (Session.productPos[pic.Name].link_image != "")
-                        {
-                            base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
-                        }
+                        //if (CheckValidUrlNoLocal(Session.productPos[pic.Name].link_image))
+                        //{
+                        //    base64_covert = Session.productPos[pic.Name].link_image;
+                        //}
+                        //else if (Session.productPos[pic.Name].link_image != "")
+                        //{
+                        //    base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
+                        //}
+
+                        base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
 
                         json = System.Text.Json.JsonSerializer.Serialize(new
                         {
@@ -4756,8 +4759,9 @@ namespace Shelf_Register
             try
             {
                 // instantiate
+                // Stop scan another 
 
-                 int temp = Session.TcpHost.Count();
+                int temp = Session.TcpHost.Count();
                 for (int i = 0; i < temp; i++)
                 {
                     multiConnections = new SimpleTcpClient(Session.TcpHost[i]);
@@ -4798,7 +4802,6 @@ namespace Shelf_Register
                     multiConnections.Connect();
                     multiConnections.Send("ACTION_REGISTER_SHELF_END");
                     multiConnections.Disconnect();
-
 
                 }
                 result = true;
