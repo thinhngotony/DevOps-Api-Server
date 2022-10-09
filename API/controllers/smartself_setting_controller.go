@@ -593,23 +593,24 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 	for _, name := range shelves {
 		if name == reqBody.Shelf_no {
 			dataExist = true
-			//Update only
-			if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
-				c.JSON(http.StatusOK, gin.H{
-					"code":    utils.SUCCESSFULLY_CODE,
-					"message": "登録に成功しました。",
-				})
-			} else {
-				c.JSON(http.StatusOK, gin.H{
-					"code":    utils.UNKNOWN_ERROR_CODE,
-					"message": err,
-				})
-			}
 		}
 	}
 
 	//Insert with condition not exist data
-	if !dataExist {
+	if dataExist {
+		//Update only
+		if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    utils.SUCCESSFULLY_CODE,
+				"message": "登録に成功しました。",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    utils.UNKNOWN_ERROR_CODE,
+				"message": err,
+			})
+		}
+	} else {
 		if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    utils.SUCCESSFULLY_CODE,
