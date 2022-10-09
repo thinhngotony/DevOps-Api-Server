@@ -1068,15 +1068,15 @@ func UpdateDirectionMSTAntena(db *sql.DB) (bool, error) {
 	return true, err
 }
 
-func TruncateDirectionMSTAntena(db *sql.DB) (bool, error) {
-	query := `TRUNCATE TABLE smart_shelf.mst_antena;`
+func TruncateDirectionMSTAntena(db *sql.DB, shelf_no string) (bool, error) {
+	query := `DELETE from smart_shelf.mst_antena WHERE shelf_no = ?;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = tx.ExecContext(ctx, query)
+	_, err = tx.ExecContext(ctx, query, shelf_no)
 	if err != nil {
 		// Incase we find any error in the query execution, rollback the transaction
 		log.Printf("Error %s when finding rows affected", err)
@@ -1187,5 +1187,6 @@ func InsertPositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 		return false, err
 	}
 	log.Printf("%d rows created ", rows)
+	UpdateDirectionMSTAntena(db)
 	return true, nil
 }
