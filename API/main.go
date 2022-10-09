@@ -61,6 +61,7 @@ func main() {
 	//Recalculate location with new function
 	r.POST("/api/v1/set_smart_shelf_location", controllers.SetSmartSelfLocation)
 
+	r.POST("/api/v1/clear_position_mst_antena", controllers.ClearPositionMSTAntena)
 	r.POST("/api/v1/update_position_mst_antena", controllers.UpdatePositionMSTAntena)
 	r.POST("/api/v1/load_position_mst_antena", controllers.LoadPositionMSTAntena)
 

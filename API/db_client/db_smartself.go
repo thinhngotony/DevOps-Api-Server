@@ -1068,7 +1068,7 @@ func UpdateDirectionMSTAntena(db *sql.DB) (bool, error) {
 	return true, err
 }
 
-func TruncateDirectionMSTAntena(db *sql.DB, shelf_no string) (bool, error) {
+func ClearDirectionMSTAntena(db *sql.DB, shelf_no string) (bool, error) {
 	query := `DELETE from smart_shelf.mst_antena WHERE shelf_no = ?;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()

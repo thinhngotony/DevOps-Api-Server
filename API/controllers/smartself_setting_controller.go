@@ -556,6 +556,57 @@ func GetSmartSelfLocationByCol(c *gin.Context) {
 
 }
 
+func ClearPositionMSTAntena(c *gin.Context) {
+	var reqBody db_client.Set_SmartShelf_Position_mst_antena
+
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.INVALID_FORMAT_CODE,
+			"data":    nil,
+			"message": "jsonリクエストの本文の形式が正しくありません。",
+		})
+		return
+
+	} else if err := validator.New().Struct(reqBody); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.MISSING_DATA_CODE,
+			"data":    nil,
+			"message": "リクエストパラメータが不足しています。",
+		})
+		return
+
+	} else if err := utils.VerifyApiKey(reqBody.ApiKey); !err {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.INVALID_API_KEY_CODE,
+			"data":    nil,
+			"message": "APIキーが正しくありません。",
+		})
+		return
+	}
+
+	db, _ := db_client.DbConnection_smartself()
+	defer db.Close()
+
+	if isSuccess, err := db_client.ClearDirectionMSTAntena(db, reqBody.Shelf_no); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.UNKNOWN_ERROR_CODE,
+			"message": err,
+		})
+	} else if isSuccess {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.SUCCESSFULLY_CODE,
+			"message": "登録に成功しました。",
+		})
+
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.UNKNOWN_ERROR_CODE,
+			"message": err,
+		})
+	}
+
+}
+
 func UpdatePositionMSTAntena(c *gin.Context) {
 	var reqBody db_client.Set_SmartShelf_Position_mst_antena
 
@@ -587,24 +638,40 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 	db, _ := db_client.DbConnection_smartself()
 	defer db.Close()
 
-	if isSuccess, err := db_client.TruncateDirectionMSTAntena(db, reqBody.Shelf_no); err != nil {
+	if isExist, err := db_client.CheckExistKeyInMST(db, reqBody.Shelf_no, reqBody.Antena_no); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    utils.UNKNOWN_ERROR_CODE,
 			"message": err,
 		})
-	} else if isSuccess {
-		//Insert with condition not exist data
-		if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.SUCCESSFULLY_CODE,
-				"message": "登録に成功しました。",
-			})
+	} else {
+		if isExist {
+			//Update only
+			if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.SUCCESSFULLY_CODE,
+					"message": "登録に成功しました。",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.UNKNOWN_ERROR_CODE,
+					"message": err,
+				})
+			}
 		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.UNKNOWN_ERROR_CODE,
-				"message": err,
-			})
+			//Insert with condition not exist data
+			if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.SUCCESSFULLY_CODE,
+					"message": "登録に成功しました。",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.UNKNOWN_ERROR_CODE,
+					"message": err,
+				})
+			}
 		}
+
 	}
 
 }
