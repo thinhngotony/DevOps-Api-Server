@@ -596,7 +596,6 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 		}
 	}
 
-	//Insert with condition not exist data
 	if dataExist {
 		//Update only
 		if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
@@ -611,6 +610,7 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 			})
 		}
 	} else {
+		//Insert with condition not exist data
 		if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    utils.SUCCESSFULLY_CODE,
