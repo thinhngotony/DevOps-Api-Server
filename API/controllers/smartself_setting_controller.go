@@ -677,7 +677,7 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 }
 
 func LoadPositionMSTAntena(c *gin.Context) {
-	var reqBody db_client.Set_SmartShelf_Position_mst_antena
+	var reqBody db_client.Get_SmartShelf_Position_mst_antena
 
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -714,15 +714,17 @@ func LoadPositionMSTAntena(c *gin.Context) {
 	// 	})
 	// } else {
 
-	if data, err := db_client.LoadPositionMSTAntena(db, reqBody.Shelf_no, reqBody.Antena_no); err != nil {
+	if data, err := db_client.LoadPositionMSTAntena(db, *reqBody.Shelf_no); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    utils.UNKNOWN_ERROR_CODE,
+			"data":    nil,
 			"message": err,
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    utils.SUCCESSFULLY_CODE,
-			"message": data,
+			"data":    data,
+			"message": "登録に成功しました。",
 		})
 	}
 }

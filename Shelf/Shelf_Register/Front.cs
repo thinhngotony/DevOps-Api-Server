@@ -72,6 +72,8 @@ namespace Shelf_Register
             Session.TcpShelfHost_Dictionary = ReadTcpHosts(temp);
             Session.time_set_location = (int)Int64.Parse(dataInFile["setlocation_interval_miliseconds"]) / 1000;
             Session.update_position_mst_antena = dataInFile["update_position_mst_antena"];
+            Session.clear_position_mst_antena = dataInFile["clear_position_mst_antena"];
+            Session.load_position_mst_antena = dataInFile["load_position_mst_antena"];
 
 
 
@@ -1832,6 +1834,12 @@ namespace Shelf_Register
             }
         }
 
+
+        public class SettingAntena
+        {
+            public int row { get; set; }
+            public int col { get; set; }
+        }
 
 
         public class OPOS : System.Windows.Forms.UserControl

@@ -42,7 +42,6 @@ namespace Shelf_Register
         public static string insert_more_info_smartself = "";
         public static string sub_get_smartshelf_location = "";
         public static string get_smartself_location_by_col = "";
-        public static string update_position_mst_antena = "";
         public static string bquery_api = "";
         public static string bquery_sub = "";
         public static string api_key = "";
@@ -136,6 +135,15 @@ namespace Shelf_Register
         // Variable for Setting.cs
         // public static List<Panel> panel_List = new List<Panel>();
         public static string nameOfShelf = "";
+        public static string load_position_mst_antena = "";
+        public static string clear_position_mst_antena = "";
+        public static string update_position_mst_antena = "";
+
+        public static List<CheckBox> antenaLoadList = new List<CheckBox>();
+        public static List<SettingAntena> settingPosition = new List<SettingAntena>();
+
+
+
 
     }
 }

@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Shelf_Register.Front;
 
 namespace Shelf_Register
 {
@@ -52,11 +53,11 @@ namespace Shelf_Register
                     {
                         if (antena % 2 == 0)
                         {
-                            pic.Click += new System.EventHandler(pictureBoxOnClick_Right);
+                            pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
                         }
                         else
                         {
-                            pic.Click += new System.EventHandler(pictureBoxOnClick_Left);
+                            pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
                         }
                     }
                 }
@@ -111,7 +112,36 @@ namespace Shelf_Register
                     }
                 } else //Handle unclick check box 
                 {
-
+                    switch (checkItem.Text)
+                    {
+                        case "ANTENA 1":
+                            // Make picture box in row 1 cannot be clicked
+                            unSetPositionForRow(1, 1);
+                            break;
+                        case "ANTENA 2":
+                            unSetPositionForRow(1, 2);
+                            break;
+                        case "ANTENA 3":
+                            unSetPositionForRow(2, 3);
+                            break;
+                        case "ANTENA 4":
+                            unSetPositionForRow(2, 4);
+                            break;
+                        case "ANTENA 5":
+                            unSetPositionForRow(3, 5);
+                            break;
+                        case "ANTENA 6":
+                            unSetPositionForRow(3, 6);
+                            break;
+                        case "ANTENA 7":
+                            unSetPositionForRow(4, 7);
+                            break;
+                        case "ANTENA 8":
+                            unSetPositionForRow(4, 8);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -323,7 +353,9 @@ namespace Shelf_Register
         {
             // Bug dự kiến: insert chỉ mỗi antena 2 nếu tick cả 2 antena
             // Get value of filed scan_col_start
-            
+
+
+            Task.Run(() => ApiClearPositionMSTAntena(Session.nameOfShelf).Wait());
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
 
@@ -331,7 +363,6 @@ namespace Shelf_Register
                 {
                     //get thong tin antenna 
                     //var (leftAntena, rightAntena, antena) = getValueToInsertMST(checkItem);
-
                     //int value = getScanColStartValue(leftAntena, rightAntena);
                     var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
                     Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
@@ -341,6 +372,136 @@ namespace Shelf_Register
 
             }
 
+        }
+
+        private void LoadDataToScreen()
+        {
+            Wait wait = new Wait();
+            wait.Visible = true;
+            foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
+            {
+                foreach (CheckBox loadAntena in Session.antenaLoadList)
+                {
+                    if (loadAntena.Name == antenaNo.Name)
+                    {
+                        if (antenaNo.Checked == false)
+                        {
+                            antenaNo.Checked = true;
+
+                        }
+                    }
+                }
+            }
+
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                foreach(var item in Session.settingPosition)
+                {
+                    if (int.Parse(pic.Name.Substring(2, 1)) == item.col && int.Parse(pic.Name.Substring(0, 1)) == item.row)
+                    {
+                        pic.Load("selected.png");
+                    }
+                }
+                
+            }
+
+
+                wait.Visible = false;
+
+        }
+
+        private async Task ApiClearPositionMSTAntena(string nameOfShelf)
+        {
+            try
+            {
+
+                HttpClient api_client = new HttpClient();
+                api_client.BaseAddress = new Uri(Session.address_api);
+                api_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                string json = "";
+
+                json = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    api_key = Session.api_key,
+                    shelf_no = nameOfShelf
+                }
+
+                );
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var result = await api_client.PostAsync(Session.clear_position_mst_antena, content);
+
+
+                if (result.IsSuccessStatusCode)
+                {
+
+                    string resultContent = await result.Content.ReadAsStringAsync();
+                    JObject data = JObject.Parse(resultContent);
+                }
+                else
+                {
+                    Console.WriteLine(result);
+                }
+
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to clear table MST Antena - ApiUpdatePositionMSTAntena");
+            }
+        }
+
+        private async Task ApiLoadPositionMSTAntena(string nameOfShelf)
+        {
+            try
+            {
+                Session.antenaLoadList = new List<CheckBox>();
+                Session.settingPosition = new List<SettingAntena>();
+                HttpClient api_client = new HttpClient();
+                api_client.BaseAddress = new Uri(Session.address_api);
+                api_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                string json = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    api_key = Session.api_key,
+                    shelf_no = nameOfShelf
+                });
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var result = await api_client.PostAsync(Session.load_position_mst_antena, content);
+
+                if (result.IsSuccessStatusCode)
+                {
+
+                    string resultContent = await result.Content.ReadAsStringAsync();
+                    JObject JsonData = JObject.Parse(resultContent);
+
+                    foreach (var item in JsonData["data"])
+                    {
+                        int row_api = Int32.Parse(item["row"].ToString());
+                        int col_api = Int32.Parse(item["scan_col_start"].ToString());
+                        string antenaNo = (string)item["antena_no"];
+
+                        Session.settingPosition.Add(new SettingAntena { row = row_api, col = col_api });
+
+                        foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
+                        {
+                            if (checkItem.Name == antenaNo)
+                            {
+                                Session.antenaLoadList.Add(checkItem);
+                            }
+
+                        } 
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(result);
+                }
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to load table MST Antena - ApiLoadPositionMSTAntena \n");
+            }
         }
 
         private async Task ApiUpdatePositionMSTAntena(string antena, int scan_col_start)
@@ -508,11 +669,27 @@ namespace Shelf_Register
 
             // Add button settingLayer - tableLayout
             Button btnSubmit = new Button();
-            btnSubmit.Text = "SUBMIT";
+            btnSubmit.Text = "REGISTER";
             btnSubmit.Height = 50;
             btnSubmit.Width = 100;
             btnSubmit.Click += new System.EventHandler(btnSubmitOnClick);
-            settingLayer.Controls.Add(btnSubmit, 8, 4);
+            settingLayer.Controls.Add(btnSubmit, 8, 4); 
+            
+            // Add button settingLayer - tableLayout
+            Button btnLoad = new Button();
+            btnLoad.Text = "LOAD";
+            btnLoad.Height = 50;
+            btnLoad.Width = 100;
+            btnLoad.Click += new System.EventHandler(btnLoadOnClick);
+            settingLayer.Controls.Add(btnLoad, 6, 4);
+
+            // Add button settingLayer - tableLayout
+            Button btnClear = new Button();
+            btnClear.Text = "CLEAR";
+            btnClear.Height = 50;
+            btnClear.Width = 100;
+            btnClear.Click += new System.EventHandler(btnClearOnClick);
+            settingLayer.Controls.Add(btnClear, 5, 4);
 
             // Add pictureBox to settingLayer
             // Solution 1: Loop all settingLayer, find position not contain checkbox and insert picturebox
@@ -601,6 +778,33 @@ namespace Shelf_Register
                 pic.Load("blank_background.png");
             }
 
+        }
+
+        private void btnClearOnClick(object sender, EventArgs e)
+        {
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                pic.Dock = DockStyle.Fill;
+                pic.Size = MaximumSize;
+                pic.SizeMode = PictureBoxSizeMode.StretchImage;
+                pic.Load("blank_background.png");
+                pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
+                pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
+
+            }
+            foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
+            {
+                if(antenaNo.Checked == true)
+                {
+                    antenaNo.Checked = false;
+                }
+            }
+        }
+
+        private void btnLoadOnClick(object sender, EventArgs e)
+        {
+            Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
+            LoadDataToScreen();
         }
 
         private void settingLayer_Paint(object sender, PaintEventArgs e)

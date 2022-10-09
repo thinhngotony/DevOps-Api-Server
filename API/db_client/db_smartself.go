@@ -332,7 +332,7 @@ func CheckExistKeyInMST(db *sql.DB, shelf_no string, antena_no string) (bool, er
 	return false, nil
 }
 
-func LoadPositionMSTAntena(db *sql.DB, shelf_no string, antena_no string) ([]Get_SmartShelf_Position_mst_antena, error) {
+func LoadPositionMSTAntena(db *sql.DB, shelf_no string) ([]Get_SmartShelf_Position_mst_antena, error) {
 	log.Printf("Loading position for MST Antena")
 	query := `SELECT shelf_no, antena_no, direction, row, col, col_size, m_min, m_max, scan_col_start, scan_col_end FROM mst_antena where shelf_no = ?`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
