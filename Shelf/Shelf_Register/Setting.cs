@@ -44,6 +44,27 @@ namespace Shelf_Register
             }
         }
 
+        private void unSetPositionForRow(int row, int antena)
+        {
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                {
+                    if (int.Parse(pic.Name.Substring(0, 1)) == row)
+                    {
+                        if (antena % 2 == 0)
+                        {
+                            pic.Click += new System.EventHandler(pictureBoxOnClick_Right);
+                        }
+                        else
+                        {
+                            pic.Click += new System.EventHandler(pictureBoxOnClick_Left);
+                        }
+                    }
+                }
+
+            }
+        }
+
         //EventOnClick for checkbox
         private void checkBoxOnClick(object sender, EventArgs e)
         {
@@ -89,7 +110,10 @@ namespace Shelf_Register
                             // code block
                             break;
                     }
-                }
+                } else //Handle unclick check box 
+                {
+
+                }    
             }
         }
 
@@ -131,31 +155,71 @@ namespace Shelf_Register
 
         private void btnSubmitOnClick(object sender, EventArgs e)
         {
+            int max = 0;
+            int min = 7;
+
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
                 foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
                 { 
                     if ( pic.ImageLocation == "selected.png") 
                     {
-                        for (var scan_col_start = 0; scan_col_start < 7; scan_col_start++) 
+                        if (checkItem.Checked)
                         {
-                            if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start) 
+                            // Left to right
+                            if (int.Parse(checkItem.Name) % 2 == 0)
                             {
-                               
+                                // Lấy giá trị lớn nhất của row để làm start
+                                for (var scan_col_start = 0; scan_col_start < 7; scan_col_start++)
+                                {
+                                    // Xử lí chỉ trong 1 row
+                                    if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start)
+                                    {
+                                        if (int.Parse(pic.Name.Substring(2, 1)) > max)
+                                        {
+                                            max = int.Parse(pic.Name.Substring(2, 1));
+                                        }
+                                    }
+
+                                }
+
+                            }
+                            // Right to left
+                            else
+                            {
+                                // Lấy giá trị nhỏ nhất của row để làm start
+                                for (var scan_col_start = 7; scan_col_start > 0; scan_col_start--)
+                                {
+                                    // Xử lí chỉ trong 1 row
+                                    if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start)
+                                    {
+                                        
+                                        if (int.Parse(pic.Name.Substring(2, 1)) < min)
+                                        {
+                                            min = int.Parse(pic.Name.Substring(2, 1));
+                                            MessageBox.Show(pic.Name);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
                     
             }
-                
+
         }
 
-        //private static void ApiUpdatePositionMSTAntena(string shelf_no, string antena, int scan_col_start, int scan_col_end)
-        //{
-        //    //string shelfNo = Front.cbShelf.SelectedItem.ToString();
+        private void checkAPI(int max)
+        {
+            MessageBox.Show(max.ToString());
+        }
 
-        //}
+        private static void ApiUpdatePositionMSTAntena(string shelf_no, string antena, int row, int col, int scan_col_start, int scan_col_end)
+        {
+            string shelfNo = Session.nameOfShelf;
+
+        }
 
 
 
@@ -318,7 +382,6 @@ namespace Shelf_Register
             settingLayer.Controls.Add(pictureBoxSetting_4_6, 6, 3);
 
             //Set event onclick for all picture box
-
             foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
             {
                 pic.Dock = DockStyle.Fill;
