@@ -157,23 +157,22 @@ namespace Shelf_Register
         {
             int max = 0;
             int min = 7;
-
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
-                foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
-                { 
-                    if ( pic.ImageLocation == "selected.png") 
+                if (checkItem.Checked)
+                {
+                    foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
                     {
-                        if (checkItem.Checked)
+                        if (pic.ImageLocation == "selected.png")
                         {
-                            // Left to right
+                            // Right to left
                             if (int.Parse(checkItem.Name) % 2 == 0)
                             {
                                 // Lấy giá trị lớn nhất của row để làm start
-                                for (var scan_col_start = 0; scan_col_start < 7; scan_col_start++)
+                                for (var index = 0; index < 7; index++)
                                 {
                                     // Xử lí chỉ trong 1 row
-                                    if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start)
+                                    if (int.Parse(pic.Name.Substring(2, 1)) == index)
                                     {
                                         if (int.Parse(pic.Name.Substring(2, 1)) > max)
                                         {
@@ -184,35 +183,32 @@ namespace Shelf_Register
                                 }
 
                             }
-                            // Right to left
+                            // Left to right
                             else
                             {
                                 // Lấy giá trị nhỏ nhất của row để làm start
-                                for (var scan_col_start = 7; scan_col_start > 0; scan_col_start--)
+                                for (var index = 7; index > 0; index--)
                                 {
                                     // Xử lí chỉ trong 1 row
-                                    if (int.Parse(pic.Name.Substring(2, 1)) == scan_col_start)
+                                    if (int.Parse(pic.Name.Substring(2, 1)) == index)
                                     {
-                                        
                                         if (int.Parse(pic.Name.Substring(2, 1)) < min)
                                         {
                                             min = int.Parse(pic.Name.Substring(2, 1));
-                                            MessageBox.Show(pic.Name);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                    
+                }                    
             }
-
+            checkAPI(max);
         }
 
-        private void checkAPI(int max)
+        private void checkAPI(int value)
         {
-            MessageBox.Show(max.ToString());
+            MessageBox.Show(value.ToString());
         }
 
         private static void ApiUpdatePositionMSTAntena(string shelf_no, string antena, int row, int col, int scan_col_start, int scan_col_end)
