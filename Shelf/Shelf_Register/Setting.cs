@@ -18,6 +18,8 @@ namespace Shelf_Register
         public Setting()
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            this.CenterToScreen();
             init();
 
 
@@ -371,6 +373,8 @@ namespace Shelf_Register
                 }
 
             }
+            DialogResult confirmResult = MessageBox.Show("Finish register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+
 
         }
 
@@ -782,21 +786,25 @@ namespace Shelf_Register
 
         private void btnClearOnClick(object sender, EventArgs e)
         {
-            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            DialogResult warningPopUp = MessageBox.Show("All data on screen will be removed, are you sure?", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            if (warningPopUp == DialogResult.Yes)
             {
-                pic.Dock = DockStyle.Fill;
-                pic.Size = MaximumSize;
-                pic.SizeMode = PictureBoxSizeMode.StretchImage;
-                pic.Load("blank_background.png");
-                pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
-                pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
-
-            }
-            foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
-            {
-                if(antenaNo.Checked == true)
+                foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
                 {
-                    antenaNo.Checked = false;
+                    pic.Dock = DockStyle.Fill;
+                    pic.Size = MaximumSize;
+                    pic.SizeMode = PictureBoxSizeMode.StretchImage;
+                    pic.Load("blank_background.png");
+                    pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
+                    pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
+
+                }
+                foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
+                {
+                    if (antenaNo.Checked == true)
+                    {
+                        antenaNo.Checked = false;
+                    }
                 }
             }
         }
@@ -805,6 +813,8 @@ namespace Shelf_Register
         {
             Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
             LoadDataToScreen();
+            DialogResult confirmResult = MessageBox.Show("Finish load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+
         }
 
         private void settingLayer_Paint(object sender, PaintEventArgs e)
