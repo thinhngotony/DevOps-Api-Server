@@ -1,14 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Shelf_Register
@@ -155,6 +146,14 @@ namespace Shelf_Register
 
         private void btnSubmitOnClick(object sender, EventArgs e)
         {
+            
+            var (min, max) = getStartIndexOfSelectedPictureBox();
+            int value = getScanColStartValue(min, max);
+            MessageBox.Show(value.ToString());
+        }
+
+        private (int, int) getStartIndexOfSelectedPictureBox()
+        {
             int max = 0;
             int min = 7;
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
@@ -165,7 +164,7 @@ namespace Shelf_Register
                     {
                         if (pic.ImageLocation == "selected.png")
                         {
-                            // Right to left
+                            // All antena in the right
                             if (int.Parse(checkItem.Name) % 2 == 0)
                             {
                                 // Lấy giá trị lớn nhất của row để làm start
@@ -179,13 +178,12 @@ namespace Shelf_Register
                                             max = int.Parse(pic.Name.Substring(2, 1));
                                         }
                                     }
-
                                 }
-
                             }
-                            // Left to right
+                            // All antena in the left
                             else
                             {
+
                                 // Lấy giá trị nhỏ nhất của row để làm start
                                 for (var index = 7; index > 0; index--)
                                 {
@@ -201,10 +199,33 @@ namespace Shelf_Register
                             }
                         }
                     }
-                }                    
+                }
             }
-            checkAPI(max);
+            return (min, max);
         }
+
+        private int getScanColStartValue(int min, int max)
+        {
+            int value = 0;
+            foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
+            {
+                if (checkItem.Checked)
+                {
+                    // All antena in the right
+                    if (int.Parse(checkItem.Name) % 2 == 0)
+                    {
+                        value = max;
+                    }
+                    // All antena in the left
+                    else
+                    {
+                        value = min;
+                    }
+                }
+            }
+            return value;
+        }
+
 
         private void checkAPI(int value)
         {
