@@ -80,11 +80,28 @@ type Set_SmartShelf_Position_mst_antena struct {
 	ApiKey         string `json:"api_key" validate:"required"`
 	Shelf_no       string `json:"shelf_no" validate:"required"`
 	Antena_no      string `json:"antena_no" validate:"required"`
+	Direction      string `json:"direction"`
 	Row            int    `json:"row"`
 	Col            int    `json:"col"`
 	ColSize        int    `json:"col_size"`
+	M_min          int    `json:"m_min"`
+	M_max          int    `json:"m_max"`
 	Scan_col_start int    `json:"scan_col_start" validate:"required"`
 	Scan_col_end   int    `json:"scan_col_end"`
+}
+
+type Get_SmartShelf_Position_mst_antena struct {
+	ApiKey         string  `json:"api_key" validate:"required"`
+	Shelf_no       *string `json:"shelf_no" validate:"required"`
+	Antena_no      *string `json:"antena_no" validate:"required"`
+	Direction      *string `json:"direction"`
+	Row            *int    `json:"row"`
+	Col            *int    `json:"col"`
+	ColSize        *int    `json:"col_size"`
+	M_min          *int    `json:"m_min"`
+	M_max          *int    `json:"m_max"`
+	Scan_col_start *int    `json:"scan_col_start" validate:"required"`
+	Scan_col_end   *int    `json:"scan_col_end"`
 }
 
 func DbConnection_smartself() (*sql.DB, error) {
@@ -308,6 +325,54 @@ func CheckExistKeyInMST(db *sql.DB, shelf_no string, antena_no string) (bool, er
 	}
 
 	return false, nil
+}
+
+func LoadPositionMSTAntena(db *sql.DB, shelf_no string, antena_no string) ([]Get_SmartShelf_Position_mst_antena, error) {
+	log.Printf("Loading position for MST Antena")
+	query := `SELECT shelf_no, antena_no, direction, row, col, col_size, m_min, m_max, scan_col_start, scan_col_end FROM mst_antena where shelf_no = ?`
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		fmt.Printf("Error %s when preparing SQL statement", err)
+		return []Get_SmartShelf_Position_mst_antena{}, err
+
+	}
+	defer stmt.Close()
+	rows, err := stmt.QueryContext(ctx, shelf_no)
+	if err != nil {
+		fmt.Printf("Error %s when query SQL statement", err)
+		return []Get_SmartShelf_Position_mst_antena{}, err
+
+	}
+	defer rows.Close()
+
+	var data_list = []Get_SmartShelf_Position_mst_antena{}
+
+	for rows.Next() {
+		var data Get_SmartShelf_Position_mst_antena
+		if err := rows.Scan(&data.Shelf_no,
+			&data.Antena_no,
+			&data.Direction,
+			&data.Row,
+			&data.Col,
+			&data.ColSize,
+			&data.M_min,
+			&data.M_max,
+			&data.Scan_col_start,
+			&data.Scan_col_end); err != nil {
+			fmt.Println(err)
+			return []Get_SmartShelf_Position_mst_antena{}, err
+		}
+		data_list = append(data_list, data)
+	}
+
+	if err := rows.Err(); err != nil {
+		return data_list, err
+	}
+
+	return data_list, nil
+
 }
 
 func CheckExistPosition(db *sql.DB, position Set_SmartSelf_Setting) (bool, error) {
@@ -1003,6 +1068,30 @@ func UpdateDirectionMSTAntena(db *sql.DB) (bool, error) {
 	return true, err
 }
 
+func TruncateDirectionMSTAntena(db *sql.DB) (bool, error) {
+	query := `TRUNCATE TABLE smart_shelf.mst_antena;`
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = tx.ExecContext(ctx, query)
+	if err != nil {
+		// Incase we find any error in the query execution, rollback the transaction
+		log.Printf("Error %s when finding rows affected", err)
+		tx.Rollback()
+		return false, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Error %s when finding rows affected", err)
+		return false, err
+	}
+
+	return true, err
+}
+
 func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_antena) (bool, error) {
 	query := `UPDATE mst_antena SET direction = ?, row = ?, col = ?, col_size = ?,  scan_col_start = ?, scan_col_end = ? WHERE antena_no = ? AND shelf_no = ?;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
@@ -1019,7 +1108,9 @@ func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 		direction = -1
 	} else {
 		reqBody.Col = 0
+		direction = 1
 	}
+
 	_, err = tx.ExecContext(ctx, query, direction, reqBody.Row, reqBody.Col, reqBody.ColSize, reqBody.Scan_col_start, reqBody.Scan_col_end, reqBody.Antena_no, reqBody.Shelf_no)
 	if err != nil {
 		// Incase we find any error in the query execution, rollback the transaction
@@ -1033,6 +1124,7 @@ func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 		return false, err
 	}
 
+	UpdateDirectionMSTAntena(db)
 	return true, err
 
 }

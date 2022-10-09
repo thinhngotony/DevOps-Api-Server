@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,12 +12,14 @@ namespace Shelf_Register
 {
     public partial class Setting : Form
     {
+        public static Dictionary<string, List<PictureBox>> dicItems = new Dictionary<string, List<PictureBox>>();
+
         public Setting()
         {
             InitializeComponent();
             init();
-            
-            
+
+
         }
 
         private void setPositionForRow(int row, int antena)
@@ -26,14 +29,14 @@ namespace Shelf_Register
                 {
                     if (int.Parse(pic.Name.Substring(0, 1)) == row)
                     {
-                        if (antena % 2  == 0)
+                        if (antena % 2 == 0)
                         {
                             pic.Click += new System.EventHandler(pictureBoxOnClick_Right);
                         }
                         else
                         {
                             pic.Click += new System.EventHandler(pictureBoxOnClick_Left);
-                        }                      
+                        }
                     }
                 }
 
@@ -109,7 +112,7 @@ namespace Shelf_Register
                 } else //Handle unclick check box 
                 {
 
-                }    
+                }
             }
         }
 
@@ -126,10 +129,10 @@ namespace Shelf_Register
                         pic.Load("selected.png");
                         //Call API                       
                     }
-
                 }
             }
         }
+
 
         private void pictureBoxOnClick_Right(object sender, EventArgs e)
         {
@@ -147,7 +150,96 @@ namespace Shelf_Register
             }
         }
 
-        private (int, int, string) getValueToInsertMST()
+        private int getRowbyAntenName(string antena)
+        {
+            int row = 0 ;
+            if (antena == "1" || antena == "2")
+            {
+                row = 1;
+            }
+            else if (antena == "3" || antena == "4")
+            {
+                row = 2;
+            }
+            else if (antena == "5" || antena == "6")
+            {
+                row = 3;
+            }
+            else if (antena == "7" || antena == "8")
+            {
+                row = 4;
+            }
+
+            return row;
+        }
+        private (int, string) getValueToInsertMST_Working(CheckBox antena)
+        {
+            int scan_col_start = 0;
+            int right_col = 6;
+            int CONST_MAX_RIGHT_COL = 6;
+            int left_col = 1;
+            int CONST_MIN_LEFT_COL = 1;
+            string antenaNo = antena.Name;
+            Boolean flgSelected = false;
+            int antenna_row = getRowbyAntenName(antena.Name);
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                if (pic.ImageLocation == "selected.png")
+                {
+                    flgSelected = true;
+                    if (int.Parse(pic.Name.Substring(0, 1)) == antenna_row){
+                        // All antena in the right
+                        if (int.Parse(antena.Name) % 2 == 0)
+                        {
+                            if (int.Parse(pic.Name.Substring(2, 1)) >= left_col)
+                            {
+                                left_col = int.Parse(pic.Name.Substring(2, 1));
+                            }
+                        }
+                        // All antena in the left
+                        else
+                        {
+                            if (int.Parse(pic.Name.Substring(2, 1)) <= right_col)
+                            {
+                                right_col = int.Parse(pic.Name.Substring(2, 1));
+                            }
+                        }
+
+
+                    }
+                }
+            }
+
+            if (int.Parse(antena.Name) % 2 == 0)
+            {
+               if (flgSelected == false )
+               {
+                    scan_col_start = CONST_MAX_RIGHT_COL;
+               }
+               else
+                {
+                    scan_col_start = left_col;
+
+                }
+                
+            }
+            else
+            {
+                if (flgSelected == false)
+                {
+                    scan_col_start = CONST_MIN_LEFT_COL;
+                }
+                else
+                {
+                    scan_col_start = right_col;
+                }
+                
+            }
+            return (scan_col_start, antenaNo);
+        }
+
+
+        private (int, int, string) getValueToInsertMST(CheckBox antena)
         {
             int rightAntena = 0;
             int leftAntena = 7;
@@ -171,6 +263,7 @@ namespace Shelf_Register
                                     {
                                         //Lấy tên antena
                                         antenaNo = checkItem.Name;
+
                                         if (int.Parse(pic.Name.Substring(2, 1)) > rightAntena)
                                         {
                                             rightAntena = int.Parse(pic.Name.Substring(2, 1));
@@ -225,13 +318,29 @@ namespace Shelf_Register
             return value;
         }
 
+
         private void btnSubmitOnClick(object sender, EventArgs e)
         {
             // Bug dự kiến: insert chỉ mỗi antena 2 nếu tick cả 2 antena
             // Get value of filed scan_col_start
-            var (leftAntena, rightAntena, antenaNo) = getValueToInsertMST();
-            int scan_col_start = getScanColStartValue(leftAntena, rightAntena);
-            Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scan_col_start)).Wait();
+            
+            foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
+            {
+
+                if (checkItem.Checked)
+                {
+                    //get thong tin antenna 
+                    //var (leftAntena, rightAntena, antena) = getValueToInsertMST(checkItem);
+
+                    //int value = getScanColStartValue(leftAntena, rightAntena);
+                    var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
+                    Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
+
+
+                }
+
+            }
+
         }
 
         private async Task ApiUpdatePositionMSTAntena(string antena, int scan_col_start)
@@ -244,18 +353,22 @@ namespace Shelf_Register
 
             if (antena == "1" || antena == "2")
             {
+                //antena = "1";
                 row = 1;
             }
             else if (antena == "3" || antena == "4")
             {
+                //antena = "2";
                 row = 2;
             }
             else if (antena == "5" || antena == "6")
             {
+                //antena = "3";
                 row = 3;
             }
             else if (antena == "7" || antena == "8")
             {
+                //antena = "4";
                 row = 4;
             }
 
@@ -330,6 +443,33 @@ namespace Shelf_Register
             antenaNo2.Name = "2";
             settingLayer.Controls.Add(antenaNo2, 7, 0);
 
+            PictureBox pictureBoxSetting_1_1 = new PictureBox();
+            pictureBoxSetting_1_1.Name = "1_1";
+            settingLayer.Controls.Add(pictureBoxSetting_1_1, 1, 0);
+
+            PictureBox pictureBoxSetting_1_2 = new PictureBox();
+            pictureBoxSetting_1_2.Name = "1_2";
+            settingLayer.Controls.Add(pictureBoxSetting_1_2, 2, 0);
+
+            PictureBox pictureBoxSetting_1_3 = new PictureBox();
+            pictureBoxSetting_1_3.Name = "1_3";
+            settingLayer.Controls.Add(pictureBoxSetting_1_3, 3, 0);
+
+
+            PictureBox pictureBoxSetting_1_4 = new PictureBox();
+            pictureBoxSetting_1_4.Name = "1_4";
+            settingLayer.Controls.Add(pictureBoxSetting_1_4, 4, 0);
+
+
+            PictureBox pictureBoxSetting_1_5 = new PictureBox();
+            pictureBoxSetting_1_5.Name = "1_5";
+            settingLayer.Controls.Add(pictureBoxSetting_1_5, 5, 0);
+
+            PictureBox pictureBoxSetting_1_6 = new PictureBox();
+            pictureBoxSetting_1_6.Name = "1_6";
+            settingLayer.Controls.Add(pictureBoxSetting_1_6, 6, 0);
+
+
             CheckBox antenaNo3 = new CheckBox();
             antenaNo3.Text = "ANTENA 3";
             antenaNo3.Name = "3";
@@ -379,29 +519,6 @@ namespace Shelf_Register
             // Solution 2: Manual insert
             // Solution 3: Loop with location
 
-            PictureBox pictureBoxSetting_1_1 = new PictureBox();
-            pictureBoxSetting_1_1.Name = "1_1";
-            settingLayer.Controls.Add(pictureBoxSetting_1_1, 1, 0);
-
-            PictureBox pictureBoxSetting_1_2 = new PictureBox();
-            pictureBoxSetting_1_2.Name = "1_2";
-            settingLayer.Controls.Add(pictureBoxSetting_1_2, 2, 0);
-
-            PictureBox pictureBoxSetting_1_3 = new PictureBox();
-            pictureBoxSetting_1_3.Name = "1_3";
-            settingLayer.Controls.Add(pictureBoxSetting_1_3, 3, 0);
-
-            PictureBox pictureBoxSetting_1_4 = new PictureBox();
-            pictureBoxSetting_1_4.Name = "1_4";
-            settingLayer.Controls.Add(pictureBoxSetting_1_4, 4, 0);
-
-            PictureBox pictureBoxSetting_1_5 = new PictureBox();
-            pictureBoxSetting_1_5.Name = "1_5";
-            settingLayer.Controls.Add(pictureBoxSetting_1_5, 5, 0);
-
-            PictureBox pictureBoxSetting_1_6 = new PictureBox();
-            pictureBoxSetting_1_6.Name = "1_6";
-            settingLayer.Controls.Add(pictureBoxSetting_1_6, 6, 0);
 
             PictureBox pictureBoxSetting_2_1 = new PictureBox();
             pictureBoxSetting_2_1.Name = "2_1";
