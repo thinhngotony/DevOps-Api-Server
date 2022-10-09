@@ -93,15 +93,20 @@ type Set_SmartShelf_Position_mst_antena struct {
 type Get_SmartShelf_Position_mst_antena struct {
 	ApiKey         string  `json:"api_key" validate:"required"`
 	Shelf_no       *string `json:"shelf_no" validate:"required"`
-	Antena_no      *string `json:"antena_no" validate:"required"`
+	Antena_no      *string `json:"antena_no"`
 	Direction      *string `json:"direction"`
 	Row            *int    `json:"row"`
 	Col            *int    `json:"col"`
 	ColSize        *int    `json:"col_size"`
 	M_min          *int    `json:"m_min"`
 	M_max          *int    `json:"m_max"`
-	Scan_col_start *int    `json:"scan_col_start" validate:"required"`
+	Scan_col_start *int    `json:"scan_col_start"`
 	Scan_col_end   *int    `json:"scan_col_end"`
+}
+
+type Clear_SmartShelf_Position_mst_antena struct {
+	ApiKey   string `json:"api_key" validate:"required"`
+	Shelf_no string `json:"shelf_no" validate:"required"`
 }
 
 func DbConnection_smartself() (*sql.DB, error) {

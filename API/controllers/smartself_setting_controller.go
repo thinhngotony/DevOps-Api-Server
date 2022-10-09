@@ -557,7 +557,7 @@ func GetSmartSelfLocationByCol(c *gin.Context) {
 }
 
 func ClearPositionMSTAntena(c *gin.Context) {
-	var reqBody db_client.Set_SmartShelf_Position_mst_antena
+	var reqBody db_client.Clear_SmartShelf_Position_mst_antena
 
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		c.JSON(http.StatusOK, gin.H{
