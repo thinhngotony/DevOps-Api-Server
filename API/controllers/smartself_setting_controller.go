@@ -587,41 +587,40 @@ func UpdatePositionMSTAntena(c *gin.Context) {
 	db, _ := db_client.DbConnection_smartself()
 	defer db.Close()
 
-	dataExist := false
-	// Check bảng có tồn tại ? Update : Insert
-	shelves, _ := db_client.GetShelfNamesMSTAntena(db)
-	for _, name := range shelves {
-		if name == reqBody.Shelf_no {
-			dataExist = true
-		}
-	}
-
-	if dataExist {
-		//Update only
-		if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.SUCCESSFULLY_CODE,
-				"message": "登録に成功しました。",
-			})
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.UNKNOWN_ERROR_CODE,
-				"message": err,
-			})
-		}
+	if isExist, err := db_client.CheckExistKeyInMST(db, reqBody.Shelf_no, reqBody.Antena_no); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    utils.UNKNOWN_ERROR_CODE,
+			"message": err,
+		})
 	} else {
-		//Insert with condition not exist data
-		if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.SUCCESSFULLY_CODE,
-				"message": "登録に成功しました。",
-			})
+		if isExist {
+			//Update only
+			if isSuccess, err := db_client.UpdatePositionMSTAntena(db, reqBody); isSuccess {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.SUCCESSFULLY_CODE,
+					"message": "登録に成功しました。",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.UNKNOWN_ERROR_CODE,
+					"message": err,
+				})
+			}
 		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    utils.UNKNOWN_ERROR_CODE,
-				"message": err,
-			})
+			//Insert with condition not exist data
+			if isSuccess, err := db_client.InsertPositionMSTAntena(db, reqBody); isSuccess {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.SUCCESSFULLY_CODE,
+					"message": "登録に成功しました。",
+				})
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"code":    utils.UNKNOWN_ERROR_CODE,
+					"message": err,
+				})
+			}
 		}
+
 	}
 
 }
