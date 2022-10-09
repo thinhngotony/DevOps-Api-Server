@@ -1,5 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Shelf_Register
@@ -119,9 +124,7 @@ namespace Shelf_Register
                     if (int.Parse(pic.Name.Substring(2, 1)) >= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
                     {
                         pic.Load("selected.png");
-                        //Call API
-                       
-
+                        //Call API                       
                     }
 
                 }
@@ -144,18 +147,11 @@ namespace Shelf_Register
             }
         }
 
-        private void btnSubmitOnClick(object sender, EventArgs e)
+        private (int, int, string) getValueToInsertMST()
         {
-            
-            var (min, max) = getStartIndexOfSelectedPictureBox();
-            int value = getScanColStartValue(min, max);
-            MessageBox.Show(value.ToString());
-        }
-
-        private (int, int) getStartIndexOfSelectedPictureBox()
-        {
-            int max = 0;
-            int min = 7;
+            int rightAntena = 0;
+            int leftAntena = 7;
+            string antenaNo = "";
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
                 if (checkItem.Checked)
@@ -173,9 +169,11 @@ namespace Shelf_Register
                                     // Xử lí chỉ trong 1 row
                                     if (int.Parse(pic.Name.Substring(2, 1)) == index)
                                     {
-                                        if (int.Parse(pic.Name.Substring(2, 1)) > max)
+                                        //Lấy tên antena
+                                        antenaNo = checkItem.Name;
+                                        if (int.Parse(pic.Name.Substring(2, 1)) > rightAntena)
                                         {
-                                            max = int.Parse(pic.Name.Substring(2, 1));
+                                            rightAntena = int.Parse(pic.Name.Substring(2, 1));
                                         }
                                     }
                                 }
@@ -183,16 +181,17 @@ namespace Shelf_Register
                             // All antena in the left
                             else
                             {
-
                                 // Lấy giá trị nhỏ nhất của row để làm start
                                 for (var index = 7; index > 0; index--)
                                 {
                                     // Xử lí chỉ trong 1 row
                                     if (int.Parse(pic.Name.Substring(2, 1)) == index)
                                     {
-                                        if (int.Parse(pic.Name.Substring(2, 1)) < min)
+                                        //Lấy tên antena
+                                        antenaNo = checkItem.Name;
+                                        if (int.Parse(pic.Name.Substring(2, 1)) < leftAntena)
                                         {
-                                            min = int.Parse(pic.Name.Substring(2, 1));
+                                            leftAntena = int.Parse(pic.Name.Substring(2, 1));
                                         }
                                     }
                                 }
@@ -201,10 +200,10 @@ namespace Shelf_Register
                     }
                 }
             }
-            return (min, max);
+            return (leftAntena, rightAntena, antenaNo);
         }
 
-        private int getScanColStartValue(int min, int max)
+        private int getScanColStartValue(int leftAntena, int rightAntena)
         {
             int value = 0;
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
@@ -214,27 +213,105 @@ namespace Shelf_Register
                     // All antena in the right
                     if (int.Parse(checkItem.Name) % 2 == 0)
                     {
-                        value = max;
+                        value = rightAntena;
                     }
                     // All antena in the left
                     else
                     {
-                        value = min;
+                        value = leftAntena;
                     }
                 }
             }
             return value;
         }
 
-
-        private void checkAPI(int value)
+        private void btnSubmitOnClick(object sender, EventArgs e)
         {
-            MessageBox.Show(value.ToString());
+            // Bug dự kiến: insert chỉ mỗi antena 2 nếu tick cả 2 antena
+            // Get value of filed scan_col_start
+            var (leftAntena, rightAntena, antenaNo) = getValueToInsertMST();
+            int scan_col_start = getScanColStartValue(leftAntena, rightAntena);
+            Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scan_col_start)).Wait();
         }
 
-        private static void ApiUpdatePositionMSTAntena(string shelf_no, string antena, int row, int col, int scan_col_start, int scan_col_end)
+        private async Task ApiUpdatePositionMSTAntena(string antena, int scan_col_start)
         {
+            //Hanle shelfNo
             string shelfNo = Session.nameOfShelf;
+
+            //Handle row 
+            int row = 0;
+
+            if (antena == "1" || antena == "2")
+            {
+                row = 1;
+            }
+            else if (antena == "3" || antena == "4")
+            {
+                row = 2;
+            }
+            else if (antena == "5" || antena == "6")
+            {
+                row = 3;
+            }
+            else if (antena == "7" || antena == "8")
+            {
+                row = 4;
+            }
+
+            //Handle col
+            int col = 7;
+
+            //Handle scan_col_end
+            int scan_col_end = 7;
+
+
+            try
+            {
+
+                HttpClient api_client = new HttpClient();
+                api_client.BaseAddress = new Uri(Session.address_api);
+                api_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                string json = "";
+
+                json = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    api_key = Session.api_key,
+                    shelf_no = shelfNo,
+                    antena_no = antena,
+                    row = row,
+                    col = col,
+                    scan_col_start = scan_col_start,
+                    scan_col_end = scan_col_end
+                }
+
+                );
+                   
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var result = await api_client.PostAsync(Session.update_position_mst_antena, content);
+
+
+                if (result.IsSuccessStatusCode)
+                {
+
+                    string resultContent = await result.Content.ReadAsStringAsync();
+                    JObject data = JObject.Parse(resultContent);
+                    Console.WriteLine(resultContent);
+                    //api_message = (string)data["message"];
+                    //api_status = (string)data["code"];
+                }
+                else
+                {
+                    Console.WriteLine(result);
+                }
+
+                
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Failed to update table MST Antena - ApiUpdatePositionMSTAntena");
+            }
+
 
         }
 
@@ -409,5 +486,9 @@ namespace Shelf_Register
 
         }
 
+        private void settingLayer_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

@@ -42,6 +42,7 @@ namespace Shelf_Register
         public static string insert_more_info_smartself = "";
         public static string sub_get_smartshelf_location = "";
         public static string get_smartself_location_by_col = "";
+        public static string update_position_mst_antena = "";
         public static string bquery_api = "";
         public static string bquery_sub = "";
         public static string api_key = "";

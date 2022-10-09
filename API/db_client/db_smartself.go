@@ -945,7 +945,7 @@ func UpdateDirectionMSTAntena(db *sql.DB) (bool, error) {
 }
 
 func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_antena) (bool, error) {
-	query := `UPDATE mst_antena SET direction = ?, row = ?, col = ?, col_size = ?,  scan_col_start = ?, scan_col_end = ? WHERE antena_no = ? AND shelf_no = ?;`
+	query := `UPDATE mst_antena SET antena_no = ?, direction = ?, row = ?, col = ?, col_size = ?,  scan_col_start = ?, scan_col_end = ? WHERE antena_no = ? AND shelf_no = ?;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 	tx, err := db.BeginTx(ctx, nil)
@@ -961,7 +961,7 @@ func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 	} else {
 		reqBody.Col = 0
 	}
-	_, err = tx.ExecContext(ctx, query, direction, reqBody.Row, reqBody.Col, reqBody.ColSize, reqBody.Scan_col_start, reqBody.Scan_col_end, reqBody.Antena_no, reqBody.Shelf_no)
+	_, err = tx.ExecContext(ctx, query, reqBody.Antena_no, direction, reqBody.Row, reqBody.Col, reqBody.ColSize, reqBody.Scan_col_start, reqBody.Scan_col_end, reqBody.Antena_no, reqBody.Shelf_no)
 	if err != nil {
 		// Incase we find any error in the query execution, rollback the transaction
 		log.Printf("Error %s when finding rows affected", err)

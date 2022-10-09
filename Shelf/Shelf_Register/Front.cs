@@ -71,8 +71,9 @@ namespace Shelf_Register
             string temp = dataInFile["TcpShelfHost"];
             Session.TcpShelfHost_Dictionary = ReadTcpHosts(temp);
             Session.time_set_location = (int)Int64.Parse(dataInFile["setlocation_interval_miliseconds"]) / 1000;
+            Session.update_position_mst_antena = dataInFile["update_position_mst_antena"];
 
-          
+
 
 
             foreach (PictureBox pictureBox_Items in ImageLayer.Controls.OfType<PictureBox>())
