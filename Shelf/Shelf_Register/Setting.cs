@@ -354,25 +354,31 @@ namespace Shelf_Register
         private void btnSubmitOnClick(object sender, EventArgs e)
         {
             // Bug dự kiến: insert chỉ mỗi antena 2 nếu tick cả 2 antena
-            // Get value of filed scan_col_start
 
+            Task<bool> result = Task.Run(() => ApiClearPositionMSTAntena((Session.nameOfShelf)));
 
-            Task.Run(() => ApiClearPositionMSTAntena(Session.nameOfShelf).Wait());
-
-            foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
+            bool isSuccess = result.Result;
+            if (isSuccess)
             {
-
-                if (checkItem.Checked)
+                foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
                 {
-                    //get thong tin antenna 
-                    //var (leftAntena, rightAntena, antena) = getValueToInsertMST(checkItem);
-                    //int value = getScanColStartValue(leftAntena, rightAntena);
-                    var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
-                    Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
+
+                    if (checkItem.Checked)
+                    {
+
+                        var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
+                        Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
+                    }
+
                 }
+                DialogResult confirmResult = MessageBox.Show("Finish register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+
+            } else
+            {
+                DialogResult confirmResult = MessageBox.Show("Failed to register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
             }
-            DialogResult confirmResult = MessageBox.Show("Finish register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+
 
 
         }
@@ -413,7 +419,7 @@ namespace Shelf_Register
 
         }
 
-        private async Task ApiClearPositionMSTAntena(string nameOfShelf)
+        private async Task<bool> ApiClearPositionMSTAntena(string nameOfShelf)
         {
             try
             {
@@ -445,12 +451,14 @@ namespace Shelf_Register
                 {
                     Console.WriteLine(result);
                 }
+                return true;
 
 
             }
             catch (Exception)
             {
                 Console.WriteLine("Failed to clear table MST Antena - ApiUpdatePositionMSTAntena");
+                return false;
             }
         }
 
