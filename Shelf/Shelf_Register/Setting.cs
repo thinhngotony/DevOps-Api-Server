@@ -358,6 +358,7 @@ namespace Shelf_Register
 
 
             Task.Run(() => ApiClearPositionMSTAntena(Session.nameOfShelf).Wait());
+
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
 
@@ -368,8 +369,6 @@ namespace Shelf_Register
                     //int value = getScanColStartValue(leftAntena, rightAntena);
                     var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
                     Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
-
-
                 }
 
             }
