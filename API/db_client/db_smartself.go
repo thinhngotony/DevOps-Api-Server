@@ -79,7 +79,8 @@ type Get_SmartSelf_Location_2 struct {
 type Set_SmartShelf_Position_mst_antena struct {
 	ApiKey         string `json:"api_key" validate:"required"`
 	Shelf_no       string `json:"shelf_no" validate:"required"`
-	Antena_no      string `json:"antena_no" validate:"required"`
+	Antena_no      string `json:"antena_no"`
+	Antena_index   string `json:"antena_index"`
 	Direction      string `json:"direction"`
 	Row            int    `json:"row"`
 	Col            int    `json:"col"`
@@ -94,6 +95,7 @@ type Get_SmartShelf_Position_mst_antena struct {
 	ApiKey         string  `json:"api_key" validate:"required"`
 	Shelf_no       *string `json:"shelf_no" validate:"required"`
 	Antena_no      *string `json:"antena_no"`
+	Antena_index   *string `json:"antena_index"`
 	Direction      *string `json:"direction"`
 	Row            *int    `json:"row"`
 	Col            *int    `json:"col"`
@@ -334,7 +336,7 @@ func CheckExistKeyInMST(db *sql.DB, shelf_no string, antena_no string) (bool, er
 
 func LoadPositionMSTAntena(db *sql.DB, shelf_no string) ([]Get_SmartShelf_Position_mst_antena, error) {
 	log.Printf("Loading position for MST Antena")
-	query := `SELECT shelf_no, antena_no, direction, row, col, col_size, m_min, m_max, scan_col_start, scan_col_end FROM mst_antena where shelf_no = ?`
+	query := `SELECT shelf_no, antena_no, antena_index, direction, row, col, col_size, m_min, m_max, scan_col_start, scan_col_end FROM mst_antena where shelf_no = ?`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 	stmt, err := db.PrepareContext(ctx, query)
@@ -358,6 +360,7 @@ func LoadPositionMSTAntena(db *sql.DB, shelf_no string) ([]Get_SmartShelf_Positi
 		var data Get_SmartShelf_Position_mst_antena
 		if err := rows.Scan(&data.Shelf_no,
 			&data.Antena_no,
+			&data.Antena_index,
 			&data.Direction,
 			&data.Row,
 			&data.Col,
@@ -1134,6 +1137,43 @@ func UpdatePositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 
 }
 
+func UpdatePositionMSTAntenaV1(db *sql.DB, reqBody Set_SmartShelf_Position_mst_antena) (bool, error) {
+	query := `UPDATE mst_antena SET direction = ?, row = ?, col = ?, col_size = ?,  scan_col_start = ?, scan_col_end = ? WHERE antena_no = ? AND shelf_no = ?;`
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Convert to int and set value for direction + Set col
+	direction := 1
+	shelf_no_int, _ := strconv.Atoi(reqBody.Shelf_no)
+	if shelf_no_int%2 == 0 {
+		direction = -1
+	} else {
+		reqBody.Col = 0
+		direction = 1
+	}
+
+	_, err = tx.ExecContext(ctx, query, direction, reqBody.Row, reqBody.Col, reqBody.ColSize, reqBody.Scan_col_start, reqBody.Scan_col_end, reqBody.Antena_no, reqBody.Shelf_no)
+	if err != nil {
+		// Incase we find any error in the query execution, rollback the transaction
+		log.Printf("Error %s when finding rows affected", err)
+		tx.Rollback()
+		return false, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Error %s when finding rows affected", err)
+		return false, err
+	}
+
+	UpdateDirectionMSTAntena(db)
+	return true, err
+
+}
+
 func InsertPositionMSTAntena_OLD(db *sql.DB) (bool, error) {
 
 	query := `INSERT INTO mst_antena ( shelf_no, direction, scan_col_start, scan_col_end )`
@@ -1161,6 +1201,42 @@ func InsertPositionMSTAntena_OLD(db *sql.DB) (bool, error) {
 }
 
 func InsertPositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_antena) (bool, error) {
+	log.Printf("Importing data to mst_antena table")
+	query := `INSERT INTO mst_antena ( shelf_no, antena_no, antena_index, direction, row, col, col_size, scan_col_start, scan_col_end ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("Error %s when preparing SQL statement", err)
+		return false, err
+	}
+	defer stmt.Close()
+
+	//Convert to int and set value for direction + Set col
+	direction := 1
+	shelf_no_int, _ := strconv.Atoi(reqBody.Shelf_no)
+	if shelf_no_int%2 == 0 {
+		direction = -1
+	} else {
+		reqBody.Col = 0
+	}
+
+	res, err := stmt.ExecContext(ctx, reqBody.Shelf_no, reqBody.Antena_no, reqBody.Antena_index, direction, reqBody.Row, reqBody.Col, reqBody.ColSize, reqBody.Scan_col_start, reqBody.Scan_col_end)
+	if err != nil {
+		log.Printf("Error %s when inserting row into log table", err)
+		return false, err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("Error %s when finding rows affected", err)
+		return false, err
+	}
+	log.Printf("%d rows created ", rows)
+	UpdateDirectionMSTAntena(db)
+	return true, nil
+}
+
+func InsertPositionMSTAntenaV1(db *sql.DB, reqBody Set_SmartShelf_Position_mst_antena) (bool, error) {
 	log.Printf("Importing data to mst_antena table")
 	query := `INSERT INTO mst_antena ( shelf_no, antena_no, direction, row, col, col_size, scan_col_start, scan_col_end ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)

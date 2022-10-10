@@ -67,13 +67,52 @@ namespace Shelf_Register
             }
         }
 
+        private void setDefaultAntenaNo(string antenaIndex, bool antenaIsSelected)
+        {
+
+            int max_antenno = 0;
+            TextBox antenaNoCurent = new TextBox();
+            foreach (TextBox antenaNo in settingLayer.Controls.OfType<TextBox>())
+            {
+                if (antenaNo.Text != "")
+                {
+                    if (max_antenno <= int.Parse(antenaNo.Text))
+                    {
+                        max_antenno = int.Parse(antenaNo.Text);
+                    }
+                }
+                if (antenaNo.Name == antenaIndex)
+                {
+                    antenaNoCurent = antenaNo;
+                }
+            }
+
+            if (antenaIsSelected)
+            {
+                if (antenaNoCurent.Text == "")
+                {
+                    max_antenno += 1;
+                    antenaNoCurent.Text = max_antenno.ToString();         
+                }
+            } else
+            {
+                antenaNoCurent.Text = "";
+            }
+
+        }
+
         //EventOnClick for checkbox
         private void checkBoxOnClick(object sender, EventArgs e)
         {
+            if (Session.isLoadSetting)
+            {
+                return;
+            }
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
                 if (checkItem.Checked)
                 {
+                    setDefaultAntenaNo(checkItem.Name, checkItem.Checked);
                     switch (checkItem.Text)
                     {
                         case "ANTENA 1":
@@ -114,6 +153,7 @@ namespace Shelf_Register
                     }
                 } else //Handle unclick check box 
                 {
+                    setDefaultAntenaNo(checkItem.Name, false);
                     switch (checkItem.Text)
                     {
                         case "ANTENA 1":
@@ -204,14 +244,31 @@ namespace Shelf_Register
 
             return row;
         }
-        private (int, string) getValueToInsertMST_Working(CheckBox antena)
+
+        private string getAntenNobyAntenIndex(string antena)
         {
+            string Ret = "";
+            foreach (TextBox antena_no in settingLayer.Controls.OfType<TextBox>())
+            {
+                if (antena_no.Name == antena)
+                {
+                    Ret = antena_no.Text;
+                }    
+            }
+            return Ret;
+        }
+    
+        private (int, string, string) getValueToInsertMST_Working(CheckBox antena)
+        {
+            
+
             int scan_col_start = 0;
             int right_col = 6;
             int CONST_MAX_RIGHT_COL = 6;
             int left_col = 1;
             int CONST_MIN_LEFT_COL = 1;
-            string antenaNo = antena.Name;
+            string antenaIndex = antena.Name;
+            string antenaNo = getAntenNobyAntenIndex(antena.Name);
             Boolean flgSelected = false;
             int antenna_row = getRowbyAntenName(antena.Name);
             foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
@@ -267,7 +324,10 @@ namespace Shelf_Register
                 }
                 
             }
-            return (scan_col_start, antenaNo);
+
+           
+
+            return (scan_col_start, antenaIndex, antenaNo);
         }
 
 
@@ -350,6 +410,28 @@ namespace Shelf_Register
             return value;
         }
 
+        //private int getAntenaNoByTxtBox(TextBox txtBox)
+        //{
+        //    int value = 0;
+        //    foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
+        //    {
+        //        if (checkItem.Checked)
+        //        {
+        //            // All antena in the right
+        //            if (int.Parse(checkItem.Name) % 2 == 0)
+        //            {
+        //                value = rightAntena;
+        //            }
+        //            // All antena in the left
+        //            else
+        //            {
+        //                value = leftAntena;
+        //            }
+        //        }
+        //    }
+        //    return value;
+        //}
+
 
         private void btnSubmitOnClick(object sender, EventArgs e)
         {
@@ -366,8 +448,8 @@ namespace Shelf_Register
                     if (checkItem.Checked)
                     {
 
-                        var (scancolstart, antenaNo) = getValueToInsertMST_Working(checkItem);
-                        Task.Run(() => ApiUpdatePositionMSTAntena(antenaNo, scancolstart)).Wait();
+                        var (scancolstart, antenaIndex, antenaNo) = getValueToInsertMST_Working(checkItem);
+                        Task.Run(() => ApiUpdatePositionMSTAntena(antenaIndex, scancolstart, antenaNo)).Wait();
                     }
 
                 }
@@ -387,15 +469,28 @@ namespace Shelf_Register
         {
             Wait wait = new Wait();
             wait.Visible = true;
-            foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
+            string[] arridx;
+            foreach (TextBox antenaNo in settingLayer.Controls.OfType<TextBox>())
+            {
+                foreach (string loadAntena in Session.antenaNoList)
+                {
+                    arridx = loadAntena.Split(',');
+                    if (antenaNo.Name == arridx[0])
+                    {
+                        antenaNo.Text = arridx[1];
+                    }
+                }
+            }
+
+            foreach (CheckBox antenaIndex in settingLayer.Controls.OfType<CheckBox>())
             {
                 foreach (CheckBox loadAntena in Session.antenaLoadList)
                 {
-                    if (loadAntena.Name == antenaNo.Name)
+                    if (loadAntena.Name == antenaIndex.Name)
                     {
-                        if (antenaNo.Checked == false)
+                        if (antenaIndex.Checked == false)
                         {
-                            antenaNo.Checked = true;
+                            antenaIndex.Checked = true;
 
                         }
                     }
@@ -415,7 +510,7 @@ namespace Shelf_Register
             }
 
 
-                wait.Visible = false;
+             wait.Visible = false;
 
         }
 
@@ -489,18 +584,33 @@ namespace Shelf_Register
                     {
                         int row_api = Int32.Parse(item["row"].ToString());
                         int col_api = Int32.Parse(item["scan_col_start"].ToString());
+                        string antenaIndex = (string)item["antena_index"];
                         string antenaNo = (string)item["antena_no"];
 
                         Session.settingPosition.Add(new SettingAntena { row = row_api, col = col_api });
 
                         foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
                         {
-                            if (checkItem.Name == antenaNo)
+                            if (checkItem.Name == antenaIndex)
                             {
                                 Session.antenaLoadList.Add(checkItem);
                             }
 
-                        } 
+                        }
+
+                        Session.antenaNoList.Add(antenaIndex +"," + antenaNo);
+
+                        //foreach (TextBox antenaNoAPI in settingLayer.Controls.OfType<TextBox>())
+                        //{
+                        //    if (antenaNoAPI.Name == antenaIndex)
+                        //    {
+                        //        antenaNoAPI.Text = antenaNo;
+                        //        Session.antenaNoList.Add(antenaNoAPI);
+                        //    }
+                        //}
+
+
+
                     }
                 }
                 else
@@ -515,7 +625,7 @@ namespace Shelf_Register
             }
         }
 
-        private async Task ApiUpdatePositionMSTAntena(string antena, int scan_col_start)
+        private async Task ApiUpdatePositionMSTAntena(string antenaIndex, int scan_col_start, string antenaNo)
         {
             //Hanle shelfNo
             string shelfNo = Session.nameOfShelf;
@@ -523,22 +633,22 @@ namespace Shelf_Register
             //Handle row 
             int row = 0;
 
-            if (antena == "1" || antena == "2")
+            if (antenaIndex == "1" || antenaIndex == "2")
             {
                 //antena = "1";
                 row = 1;
             }
-            else if (antena == "3" || antena == "4")
+            else if (antenaIndex == "3" || antenaIndex == "4")
             {
                 //antena = "2";
                 row = 2;
             }
-            else if (antena == "5" || antena == "6")
+            else if (antenaIndex == "5" || antenaIndex == "6")
             {
                 //antena = "3";
                 row = 3;
             }
-            else if (antena == "7" || antena == "8")
+            else if (antenaIndex == "7" || antenaIndex == "8")
             {
                 //antena = "4";
                 row = 4;
@@ -553,6 +663,13 @@ namespace Shelf_Register
 
             try
             {
+                foreach (TextBox txtBox in settingLayer.Controls.OfType<TextBox>())
+                {
+                    if (txtBox.Text != "")
+                    {
+
+                    }
+                }
 
                 HttpClient api_client = new HttpClient();
                 api_client.BaseAddress = new Uri(Session.address_api);
@@ -563,7 +680,8 @@ namespace Shelf_Register
                 {
                     api_key = Session.api_key,
                     shelf_no = shelfNo,
-                    antena_no = antena,
+                    antena_index = antenaIndex,
+                    antena_no = antenaNo,
                     row = row,
                     col = col,
                     scan_col_start = scan_col_start,
@@ -602,9 +720,60 @@ namespace Shelf_Register
 
 
 
-        private void init()
+        public void init()
         {
+            //Add textbox
+
+            TextBox textBox1_1 = new TextBox();
+            textBox1_1.Text = "";
+            textBox1_1.Name = "1";
+            settingLayer.Controls.Add(textBox1_1, 0, 0);
+
+
+            TextBox textBox1_2 = new TextBox();
+            textBox1_2.Text = "";
+            textBox1_2.Name = "2";
+            settingLayer.Controls.Add(textBox1_2, 8, 0);
+
+
+            TextBox textBox2_1 = new TextBox();
+            textBox2_1.Text = "";
+            textBox2_1.Name = "3";
+            settingLayer.Controls.Add(textBox2_1, 0, 1);
+
+
+            TextBox textBox2_2 = new TextBox();
+            textBox2_2.Text = "";
+            textBox2_2.Name = "4";
+            settingLayer.Controls.Add(textBox2_2, 8, 1);
+
+
+            TextBox textBox3_1 = new TextBox();
+            textBox3_1.Text = "";
+            textBox3_1.Name = "5";
+            settingLayer.Controls.Add(textBox3_1, 0, 2);
+
+
+            TextBox textBox3_2 = new TextBox();
+            textBox3_2.Text = "";
+            textBox3_2.Name = "6";
+            settingLayer.Controls.Add(textBox3_2, 8, 2);
+
+            TextBox textBox4_1 = new TextBox();
+            textBox4_1.Text = "";
+            textBox4_1.Name = "7";
+            settingLayer.Controls.Add(textBox4_1, 0, 3);
+
+
+            TextBox textBox4_2 = new TextBox();
+            textBox4_2.Text = "";
+            textBox4_2.Name = "8";
+            settingLayer.Controls.Add(textBox4_2, 8, 3);
+
+
+
             // Add checkbox to settingLayer - tableLayout
+
             CheckBox antenaNo1 = new CheckBox();
             antenaNo1.Text = "ANTENA 1";
             antenaNo1.Name = "1";
@@ -614,33 +783,6 @@ namespace Shelf_Register
             antenaNo2.Text = "ANTENA 2";
             antenaNo2.Name = "2";
             settingLayer.Controls.Add(antenaNo2, 7, 0);
-
-            PictureBox pictureBoxSetting_1_1 = new PictureBox();
-            pictureBoxSetting_1_1.Name = "1_1";
-            settingLayer.Controls.Add(pictureBoxSetting_1_1, 1, 0);
-
-            PictureBox pictureBoxSetting_1_2 = new PictureBox();
-            pictureBoxSetting_1_2.Name = "1_2";
-            settingLayer.Controls.Add(pictureBoxSetting_1_2, 2, 0);
-
-            PictureBox pictureBoxSetting_1_3 = new PictureBox();
-            pictureBoxSetting_1_3.Name = "1_3";
-            settingLayer.Controls.Add(pictureBoxSetting_1_3, 3, 0);
-
-
-            PictureBox pictureBoxSetting_1_4 = new PictureBox();
-            pictureBoxSetting_1_4.Name = "1_4";
-            settingLayer.Controls.Add(pictureBoxSetting_1_4, 4, 0);
-
-
-            PictureBox pictureBoxSetting_1_5 = new PictureBox();
-            pictureBoxSetting_1_5.Name = "1_5";
-            settingLayer.Controls.Add(pictureBoxSetting_1_5, 5, 0);
-
-            PictureBox pictureBoxSetting_1_6 = new PictureBox();
-            pictureBoxSetting_1_6.Name = "1_6";
-            settingLayer.Controls.Add(pictureBoxSetting_1_6, 6, 0);
-
 
             CheckBox antenaNo3 = new CheckBox();
             antenaNo3.Text = "ANTENA 3";
@@ -678,35 +820,37 @@ namespace Shelf_Register
                 checkItem.CheckedChanged += new System.EventHandler(checkBoxOnClick);
             }
 
-            // Add button settingLayer - tableLayout
-            Button btnSubmit = new Button();
-            btnSubmit.Text = "REGISTER";
-            btnSubmit.Height = 50;
-            btnSubmit.Width = 100;
-            btnSubmit.Click += new System.EventHandler(btnSubmitOnClick);
-            settingLayer.Controls.Add(btnSubmit, 8, 4); 
-            
-            // Add button settingLayer - tableLayout
-            Button btnLoad = new Button();
-            btnLoad.Text = "LOAD";
-            btnLoad.Height = 50;
-            btnLoad.Width = 100;
-            btnLoad.Click += new System.EventHandler(btnLoadOnClick);
-            settingLayer.Controls.Add(btnLoad, 6, 4);
-
-            // Add button settingLayer - tableLayout
-            Button btnClear = new Button();
-            btnClear.Text = "CLEAR";
-            btnClear.Height = 50;
-            btnClear.Width = 100;
-            btnClear.Click += new System.EventHandler(btnClearOnClick);
-            settingLayer.Controls.Add(btnClear, 5, 4);
 
             // Add pictureBox to settingLayer
             // Solution 1: Loop all settingLayer, find position not contain checkbox and insert picturebox
             // Solution 2: Manual insert
             // Solution 3: Loop with location
 
+            PictureBox pictureBoxSetting_1_1 = new PictureBox();
+            pictureBoxSetting_1_1.Name = "1_1";
+            settingLayer.Controls.Add(pictureBoxSetting_1_1, 1, 0);
+
+            PictureBox pictureBoxSetting_1_2 = new PictureBox();
+            pictureBoxSetting_1_2.Name = "1_2";
+            settingLayer.Controls.Add(pictureBoxSetting_1_2, 2, 0);
+
+            PictureBox pictureBoxSetting_1_3 = new PictureBox();
+            pictureBoxSetting_1_3.Name = "1_3";
+            settingLayer.Controls.Add(pictureBoxSetting_1_3, 3, 0);
+
+
+            PictureBox pictureBoxSetting_1_4 = new PictureBox();
+            pictureBoxSetting_1_4.Name = "1_4";
+            settingLayer.Controls.Add(pictureBoxSetting_1_4, 4, 0);
+
+
+            PictureBox pictureBoxSetting_1_5 = new PictureBox();
+            pictureBoxSetting_1_5.Name = "1_5";
+            settingLayer.Controls.Add(pictureBoxSetting_1_5, 5, 0);
+
+            PictureBox pictureBoxSetting_1_6 = new PictureBox();
+            pictureBoxSetting_1_6.Name = "1_6";
+            settingLayer.Controls.Add(pictureBoxSetting_1_6, 6, 0);
 
             PictureBox pictureBoxSetting_2_1 = new PictureBox();
             pictureBoxSetting_2_1.Name = "2_1";
@@ -789,6 +933,29 @@ namespace Shelf_Register
                 pic.Load("blank_background.png");
             }
 
+            // Add button settingLayer - tableLayout
+            Button btnSubmit = new Button();
+            btnSubmit.Text = "REGISTER";
+            btnSubmit.Height = 50;
+            btnSubmit.Width = 100;
+            btnSubmit.Click += new System.EventHandler(btnSubmitOnClick);
+            settingLayer.Controls.Add(btnSubmit, 6, 4);
+
+            // Add button settingLayer - tableLayout
+            Button btnLoad = new Button();
+            btnLoad.Text = "LOAD";
+            btnLoad.Height = 50;
+            btnLoad.Width = 100;
+            btnLoad.Click += new System.EventHandler(btnLoadOnClick);
+            settingLayer.Controls.Add(btnLoad, 5, 4);
+
+            // Add button settingLayer - tableLayout
+            Button btnClear = new Button();
+            btnClear.Text = "CLEAR";
+            btnClear.Height = 50;
+            btnClear.Width = 100;
+            btnClear.Click += new System.EventHandler(btnClearOnClick);
+            settingLayer.Controls.Add(btnClear, 4, 4);
         }
 
         private void btnClearOnClick(object sender, EventArgs e)
@@ -806,11 +973,19 @@ namespace Shelf_Register
                     pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
 
                 }
-                foreach (CheckBox antenaNo in settingLayer.Controls.OfType<CheckBox>())
+                foreach (CheckBox antenaIndex in settingLayer.Controls.OfType<CheckBox>())
                 {
-                    if (antenaNo.Checked == true)
+                    if (antenaIndex.Checked == true)
                     {
-                        antenaNo.Checked = false;
+                        antenaIndex.Checked = false;
+                    }
+                }
+
+                foreach (TextBox antenaNo in settingLayer.Controls.OfType<TextBox>())
+                {
+                    if (antenaNo.Text != "")
+                    {
+                        antenaNo.Text = "";
                     }
                 }
             }
@@ -818,9 +993,11 @@ namespace Shelf_Register
 
         private void btnLoadOnClick(object sender, EventArgs e)
         {
+            Session.isLoadSetting = true;
             Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
             LoadDataToScreen();
             DialogResult confirmResult = MessageBox.Show("Finish load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+            Session.isLoadSetting = false;
 
         }
 

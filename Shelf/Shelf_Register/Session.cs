@@ -140,7 +140,12 @@ namespace Shelf_Register
         public static string update_position_mst_antena = "";
 
         public static List<CheckBox> antenaLoadList = new List<CheckBox>();
+        //public static List<TextBox> antenaNoList = new List<TextBox>();
+        public static List<string> antenaNoList = new List<string>();
         public static List<SettingAntena> settingPosition = new List<SettingAntena>();
+
+        public static bool isLoadSetting = false;
+
 
 
 
