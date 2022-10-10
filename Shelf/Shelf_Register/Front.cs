@@ -87,7 +87,7 @@ namespace Shelf_Register
 
             Task.Run(() => ApiGetSmartShelfNames()).Wait();
             cbShelf.DataSource = Session.smart_shelf_names;
-            cbShelf.SelectedItem = "SHELF 2";
+            cbShelf.SelectedItem = "SHELF 1";
             txtInterval.Text = Session.time_check.ToString();
             txtLocation.Text = Session.time_set_location.ToString();
 
@@ -5031,8 +5031,8 @@ namespace Shelf_Register
 
         private void All_txt_click(object sender, EventArgs e)
         {
-            if (Session.scan_mode == true) 
-            { 
+            //if (Session.scan_mode == true) 
+            //{ 
             TextBox txtBox_Items = (TextBox)sender;
             string shelfName = cbShelf.Text;
             int row = (int)Int64.Parse(txtBox_Items.Name.Substring(8, 1));
@@ -5131,7 +5131,7 @@ namespace Shelf_Register
             gridView.detailData.DataSource = dt;         
             gridView.Show();
             gridView.detailData.ClearSelection();
-            }
+            
 
 
         }
