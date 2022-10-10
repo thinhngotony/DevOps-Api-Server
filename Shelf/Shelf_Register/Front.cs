@@ -87,7 +87,7 @@ namespace Shelf_Register
 
             Task.Run(() => ApiGetSmartShelfNames()).Wait();
             cbShelf.DataSource = Session.smart_shelf_names;
-            cbShelf.SelectedItem = "SHELF 1";
+            cbShelf.SelectedItem = "SHELF 2";
             txtInterval.Text = Session.time_check.ToString();
             txtLocation.Text = Session.time_set_location.ToString();
 
