@@ -21,6 +21,7 @@ namespace Shelf_Register
             this.StartPosition = FormStartPosition.Manual;
             this.CenterToScreen();
             init();
+            
 
 
         }
@@ -44,6 +45,20 @@ namespace Shelf_Register
                 }
 
             }
+        }
+
+        private void setPositionForAll()
+        {
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                pic.Click += new System.EventHandler(pictureBoxOnClick);
+            }
+        }
+
+        private void pictureBoxOnClick(object sender, EventArgs e)
+        {
+            PictureBox choosing = sender as PictureBox;
+            choosing.Load("selected.png");
         }
 
         private void unSetPositionForRow(int row, int antena)
@@ -110,80 +125,81 @@ namespace Shelf_Register
             }
             foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
             {
+                setDefaultAntenaNo(checkItem.Name, checkItem.Checked);
                 if (checkItem.Checked)
                 {
-                    setDefaultAntenaNo(checkItem.Name, checkItem.Checked);
-                    switch (checkItem.Text)
-                    {
-                        case "ANTENA 1":
-                            // Make picture box in row 1 can be clicked
-                            setPositionForRow(1, 1);
-                            break;
-                        case "ANTENA 2":
-                            // code block
-                            setPositionForRow(1, 2);
-                            break;
-                        case "ANTENA 3":
-                            setPositionForRow(2, 3);
-                            // code block
-                            break;
-                        case "ANTENA 4":
-                            setPositionForRow(2, 4);
-                            // code block
-                            break;
-                        case "ANTENA 5":
-                            setPositionForRow(3, 5);
-                            // code block
-                            break;
-                        case "ANTENA 6":
-                            setPositionForRow(3, 6);
-                            // code block
-                            break;
-                        case "ANTENA 7":
-                            setPositionForRow(4, 7);
-                            // code block
-                            break;
-                        case "ANTENA 8":
-                            setPositionForRow(4, 8);
-                            // code block
-                            break;
-                        default:
-                            // code block
-                            break;
-                    }
+                    //setDefaultAntenaNo(checkItem.Name, checkItem.Checked);
+                    //switch (checkItem.Name)
+                    //{
+                    //    case "1":
+                    //        // Make picture box in row 1 can be clicked
+                    //        setPositionForRow(1, 1);
+                    //        break;
+                    //    case "2":
+                    //        // code block
+                    //        setPositionForRow(1, 2);
+                    //        break;
+                    //    case "3":
+                    //        setPositionForRow(2, 3);
+                    //        // code block
+                    //        break;
+                    //    case "4":
+                    //        setPositionForRow(2, 4);
+                    //        // code block
+                    //        break;
+                    //    case "5":
+                    //        setPositionForRow(3, 5);
+                    //        // code block
+                    //        break;
+                    //    case "6":
+                    //        setPositionForRow(3, 6);
+                    //        // code block
+                    //        break;
+                    //    case "7":
+                    //        setPositionForRow(4, 7);
+                    //        // code block
+                    //        break;
+                    //    case "8":
+                    //        setPositionForRow(4, 8);
+                    //        // code block
+                    //        break;
+                    //    default:
+                    //        // code block
+                    //        break;
+                    //}
                 } else //Handle unclick check box 
                 {
-                    setDefaultAntenaNo(checkItem.Name, false);
-                    switch (checkItem.Text)
-                    {
-                        case "ANTENA 1":
-                            // Make picture box in row 1 cannot be clicked
-                            unSetPositionForRow(1, 1);
-                            break;
-                        case "ANTENA 2":
-                            unSetPositionForRow(1, 2);
-                            break;
-                        case "ANTENA 3":
-                            unSetPositionForRow(2, 3);
-                            break;
-                        case "ANTENA 4":
-                            unSetPositionForRow(2, 4);
-                            break;
-                        case "ANTENA 5":
-                            unSetPositionForRow(3, 5);
-                            break;
-                        case "ANTENA 6":
-                            unSetPositionForRow(3, 6);
-                            break;
-                        case "ANTENA 7":
-                            unSetPositionForRow(4, 7);
-                            break;
-                        case "ANTENA 8":
-                            unSetPositionForRow(4, 8);
-                            break;
-                        default:
-                            break;
-                    }
+                    //setDefaultAntenaNo(checkItem.Name, false);
+                    //switch (checkItem.Text)
+                    //{
+                    //    case "1":
+                    //        // Make picture box in row 1 cannot be clicked
+                    //        unSetPositionForRow(1, 1);
+                    //        break;
+                    //    case "2":
+                    //        unSetPositionForRow(1, 2);
+                    //        break;
+                    //    case "3":
+                    //        unSetPositionForRow(2, 3);
+                    //        break;
+                    //    case "4":
+                    //        unSetPositionForRow(2, 4);
+                    //        break;
+                    //    case "5":
+                    //        unSetPositionForRow(3, 5);
+                    //        break;
+                    //    case "6":
+                    //        unSetPositionForRow(3, 6);
+                    //        break;
+                    //    case "7":
+                    //        unSetPositionForRow(4, 7);
+                    //        break;
+                    //    case "8":
+                    //        unSetPositionForRow(4, 8);
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
                 }
             }
         }
@@ -191,35 +207,45 @@ namespace Shelf_Register
         private void pictureBoxOnClick_Left(object sender, EventArgs e)
         {
             PictureBox pictureBoxClicked = sender as PictureBox;
-            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            pictureBoxClicked.Load("selected.png");
+            if (pictureBoxClicked.ImageLocation == "selected.png")
             {
-                if (int.Parse(pic.Name.Substring(0, 1)) == int.Parse(pictureBoxClicked.Name.Substring(0, 1)))
-                {
-                    pic.Load("blank_background.png");
-                    if (int.Parse(pic.Name.Substring(2, 1)) >= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
-                    {
-                        pic.Load("selected.png");
-                        //Call API                       
-                    }
-                }
+                pictureBoxClicked.Load("blank_background.png");
             }
+            //foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            //{
+            //    if (int.Parse(pic.Name.Substring(0, 1)) == int.Parse(pictureBoxClicked.Name.Substring(0, 1)))
+            //    {
+            //        pic.Load("blank_background.png");
+            //        if (int.Parse(pic.Name.Substring(2, 1)) >= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
+            //        {
+            //            pic.Load("selected.png");
+            //            //Call API                       
+            //        }
+            //    }
+            //}
         }
 
 
         private void pictureBoxOnClick_Right(object sender, EventArgs e)
         {
             PictureBox pictureBoxClicked = sender as PictureBox;
-            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            pictureBoxClicked.Load("selected.png");
+            if (pictureBoxClicked.ImageLocation == "selected.png")
             {
-                if (int.Parse(pic.Name.Substring(0, 1)) == int.Parse(pictureBoxClicked.Name.Substring(0, 1)))
-                {
-                    pic.Load("blank_background.png");
-                    if (int.Parse(pic.Name.Substring(2, 1)) <= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
-                    {
-                        pic.Load("selected.png");
-                    }
-                }
+                pictureBoxClicked.Load("blank_background.png");
             }
+            //foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            //{
+            //    if (int.Parse(pic.Name.Substring(0, 1)) == int.Parse(pictureBoxClicked.Name.Substring(0, 1)))
+            //    {
+            //        pic.Load("blank_background.png");
+            //        if (int.Parse(pic.Name.Substring(2, 1)) <= int.Parse(pictureBoxClicked.Name.Substring(2, 1)))
+            //        {
+            //            pic.Load("selected.png");
+            //        }
+            //    }
+            //}
         }
 
         private int getRowbyAntenName(string antena)
@@ -723,6 +749,7 @@ namespace Shelf_Register
         public void init()
         {
             //Add textbox
+            setPositionForAll();
 
             TextBox textBox1_1 = new TextBox();
             textBox1_1.Text = "";
@@ -775,42 +802,42 @@ namespace Shelf_Register
             // Add checkbox to settingLayer - tableLayout
 
             CheckBox antenaNo1 = new CheckBox();
-            antenaNo1.Text = "ANTENA 1";
+            antenaNo1.Text = "ANTENA";
             antenaNo1.Name = "1";
             settingLayer.Controls.Add(antenaNo1, 0, 0);
 
             CheckBox antenaNo2 = new CheckBox();
-            antenaNo2.Text = "ANTENA 2";
+            antenaNo2.Text = "ANTENA";
             antenaNo2.Name = "2";
             settingLayer.Controls.Add(antenaNo2, 7, 0);
 
             CheckBox antenaNo3 = new CheckBox();
-            antenaNo3.Text = "ANTENA 3";
+            antenaNo3.Text = "ANTENA";
             antenaNo3.Name = "3";
             settingLayer.Controls.Add(antenaNo3, 0, 1);
 
             CheckBox antenaNo4 = new CheckBox();
-            antenaNo4.Text = "ANTENA 4";
+            antenaNo4.Text = "ANTENA";
             antenaNo4.Name = "4";
             settingLayer.Controls.Add(antenaNo4, 7, 1);
 
             CheckBox antenaNo5 = new CheckBox();
-            antenaNo5.Text = "ANTENA 5";
+            antenaNo5.Text = "ANTENA";
             antenaNo5.Name = "5";
             settingLayer.Controls.Add(antenaNo5, 0, 2);
 
             CheckBox antenaNo6 = new CheckBox();
-            antenaNo6.Text = "ANTENA 6";
+            antenaNo6.Text = "ANTENA";
             antenaNo6.Name = "6";
             settingLayer.Controls.Add(antenaNo6, 7, 2);
 
             CheckBox antenaNo7 = new CheckBox();
-            antenaNo7.Text = "ANTENA 7";
+            antenaNo7.Text = "ANTENA";
             antenaNo7.Name = "7";
             settingLayer.Controls.Add(antenaNo7, 0, 3);
 
             CheckBox antenaNo8 = new CheckBox();
-            antenaNo8.Text = "ANTENA 8";
+            antenaNo8.Text = "ANTENA";
             antenaNo8.Name = "8";
             settingLayer.Controls.Add(antenaNo8, 7, 3);
 
@@ -931,6 +958,7 @@ namespace Shelf_Register
                 pic.Size = MaximumSize;
                 pic.SizeMode = PictureBoxSizeMode.StretchImage;
                 pic.Load("blank_background.png");
+                pic.Click += new System.EventHandler(picOnClick);
             }
 
             // Add button settingLayer - tableLayout
@@ -958,41 +986,60 @@ namespace Shelf_Register
             settingLayer.Controls.Add(btnClear, 4, 4);
         }
 
+        private void picOnClick(object sender, EventArgs e)
+        {
+            PictureBox pictureBoxClicked = sender as PictureBox;
+
+            if (pictureBoxClicked.ImageLocation == "selected.png")
+            {
+                pictureBoxClicked.Load("blank_background.png");
+            } else
+            {
+                pictureBoxClicked.Load("selected.png");
+
+            }
+        }
+
         private void btnClearOnClick(object sender, EventArgs e)
         {
             DialogResult warningPopUp = MessageBox.Show("All data on screen will be removed, are you sure?", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (warningPopUp == DialogResult.Yes)
             {
-                foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
-                {
-                    pic.Dock = DockStyle.Fill;
-                    pic.Size = MaximumSize;
-                    pic.SizeMode = PictureBoxSizeMode.StretchImage;
-                    pic.Load("blank_background.png");
-                    pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
-                    pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
-
-                }
-                foreach (CheckBox antenaIndex in settingLayer.Controls.OfType<CheckBox>())
-                {
-                    if (antenaIndex.Checked == true)
-                    {
-                        antenaIndex.Checked = false;
-                    }
-                }
-
-                foreach (TextBox antenaNo in settingLayer.Controls.OfType<TextBox>())
-                {
-                    if (antenaNo.Text != "")
-                    {
-                        antenaNo.Text = "";
-                    }
-                }
+                reset();
             }
         }
 
+        private void reset()
+        {
+            foreach (PictureBox pic in settingLayer.Controls.OfType<PictureBox>())
+            {
+                pic.Dock = DockStyle.Fill;
+                pic.Size = MaximumSize;
+                pic.SizeMode = PictureBoxSizeMode.StretchImage;
+                pic.Load("blank_background.png");
+                pic.Click -= new System.EventHandler(pictureBoxOnClick_Right);
+                pic.Click -= new System.EventHandler(pictureBoxOnClick_Left);
+
+            }
+            foreach (CheckBox antenaIndex in settingLayer.Controls.OfType<CheckBox>())
+            {
+                if (antenaIndex.Checked == true)
+                {
+                    antenaIndex.Checked = false;
+                }
+            }
+
+            foreach (TextBox antenaNo in settingLayer.Controls.OfType<TextBox>())
+            {
+                if (antenaNo.Text != "")
+                {
+                    antenaNo.Text = "";
+                }
+            }
+        }
         private void btnLoadOnClick(object sender, EventArgs e)
         {
+            reset();
             Session.isLoadSetting = true;
             Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
             LoadDataToScreen();

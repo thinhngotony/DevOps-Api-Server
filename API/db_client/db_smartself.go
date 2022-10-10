@@ -790,7 +790,7 @@ func SetSmartSelfLocation(db *sql.DB) (bool, error) {
 			GROUP BY
 				sl.drd_rfid_cd 
 			) AS slc
-		LEFT JOIN MST_ANTENA ma ON ( slc.n = ma.antena_no AND ma.shelf_no = slc.shelf_no) 
+		,MST_ANTENA ma WHERE slc.n = ma.antena_no AND ma.shelf_no = slc.shelf_no
 		)`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
@@ -1051,8 +1051,8 @@ func GetSmartSelfLocationByCol(db *sql.DB, shelf_name string, col int, row int) 
 
 func UpdateDirectionMSTAntena(db *sql.DB) (bool, error) {
 	query := `UPDATE mst_antena set direction = case 
-	when mod(antena_no,2) = 0 then -1
-	when mod(antena_no,2) <> 0 then 1
+	when mod(antena_index,2) = 0 then -1
+	when mod(antena_index,2) <> 0 then 1
 	end;`
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()

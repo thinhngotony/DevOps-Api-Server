@@ -264,7 +264,6 @@ C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\System.ValueTuple.xml
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\Interop.OPOSRFIDLib.dll
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\AxInterop.OPOSRFIDLib.dll
-C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.AssemblyReference.cache
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Interop.OPOSRFIDLib.dll
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\AxInterop.OPOSRFIDLib.dll
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.ResolveComReference.cache
@@ -280,3 +279,4 @@ C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.CopyComplete
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.exe
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.pdb
+C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.AssemblyReference.cache
