@@ -882,10 +882,22 @@ namespace Shelf_Register
                     _image.Save(_mStream, _image.RawFormat);
                     byte[] _imageBytes = _mStream.ToArray();
                     _base64String = Convert.ToBase64String(_imageBytes);
-
                     return  _base64String;
                 }
             }
+        }
+
+        public static string ImageToBase64_Online(string _imagePath)
+        {
+            string encodedUrl = Convert.ToBase64String(Encoding.Default.GetBytes(_imagePath));
+
+            using (var client = new WebClient())
+            {
+                byte[] dataBytes = client.DownloadData(new Uri(_imagePath));
+                string encodedFileAsBase64 = Convert.ToBase64String(dataBytes);
+                return encodedFileAsBase64;
+            }
+            
         }
 
         private async Task ApiSetSmartShelfSetting(string dpp_shelf_name)
@@ -911,20 +923,26 @@ namespace Shelf_Register
                         {
                             Session.productPos[pic.Name].link_image = "";
                         }
+
+                        string temp = Session.productPos[pic.Name].link_image;
+                        Console.WriteLine("bug is", temp);
                         //Nếu base 64 OK
-                        //Nếu link Online OK
+                        //Nếu link Online OK => Chuyển thành link local
                         //Nếu link local => Covert sang base64
                         string base64_covert = "";
-                        //if (CheckValidUrlNoLocal(Session.productPos[pic.Name].link_image))
-                        //{
-                        //    base64_covert = Session.productPos[pic.Name].link_image;
-                        //}
-                        //else if (Session.productPos[pic.Name].link_image != "")
+                        if (CheckValidUrlNoLocal(Session.productPos[pic.Name].link_image))
+                        {
+                            base64_covert = ImageToBase64_Online(Session.productPos[pic.Name].link_image);
+                        }
+                        else if (Session.productPos[pic.Name].link_image != "")
+                        {
+                            base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
+                        }
+
+                        //if (Session.productPos[pic.Name].link_image != "")
                         //{
                         //    base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
                         //}
-
-                        base64_covert = ImageToBase64(Session.productPos[pic.Name].link_image);
 
                         json = System.Text.Json.JsonSerializer.Serialize(new
                         {
@@ -4978,6 +4996,7 @@ namespace Shelf_Register
                 api_message = " Set location complete";
                 messageFromApp.Text += DateTime.Now.ToString("hh:mm:ss") + api_message + "\n";
                 wait.Visible = false;
+                Session.scan_mode = false;
             }
             
 
