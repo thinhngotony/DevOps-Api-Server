@@ -301,8 +301,8 @@ namespace Shelf_Register
             {
                 if (pic.ImageLocation == "selected.png")
                 {
-                    flgSelected = true;
                     if (int.Parse(pic.Name.Substring(0, 1)) == antenna_row){
+                        flgSelected = true;
                         // All antena in the right
                         if (int.Parse(antena.Name) % 2 == 0)
                         {
@@ -333,8 +333,7 @@ namespace Shelf_Register
                }
                else
                 {
-
-                    scan_col_start = right_col;
+                    scan_col_start = left_col;
                 }
                 
             }
@@ -346,12 +345,10 @@ namespace Shelf_Register
                 }
                 else
                 {
-                    scan_col_start = left_col;
+                    scan_col_start = right_col;
                 }
                 
             }
-
-           
 
             return (scan_col_start, antenaIndex, antenaNo);
         }
@@ -759,6 +756,7 @@ namespace Shelf_Register
             TextBox textBox1_1 = new TextBox();
             textBox1_1.Text = "";
             textBox1_1.Name = "1";
+            textBox1_1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txt_KeyPress);
             settingLayer.Controls.Add(textBox1_1, 0, 0);
 
 
@@ -1065,6 +1063,26 @@ namespace Shelf_Register
         private void settingLayer_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void Setting_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txt_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // If you want, you can allow decimal (float) numbers
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
         }
     }
 }

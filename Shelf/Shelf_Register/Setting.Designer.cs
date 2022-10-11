@@ -67,6 +67,7 @@ namespace Shelf_Register
             this.Controls.Add(this.settingLayer);
             this.Name = "Setting";
             this.Text = "Setting";
+            this.Load += new System.EventHandler(this.Setting_Load);
             this.ResumeLayout(false);
 
         }
