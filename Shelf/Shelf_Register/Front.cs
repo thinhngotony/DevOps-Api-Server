@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using KillProcessRFID;
 
 namespace Shelf_Register
 {
@@ -37,6 +38,8 @@ namespace Shelf_Register
             InitializeComponent();
             this.StartPosition = FormStartPosition.Manual;
             this.CenterToScreen();
+
+            KillProcessRFID.ControlKill.KillRFIDProcess_diffCurrent();
             init();
             Session.front = this;
             txtRfid.Text = Session.rfidcode;
@@ -1764,14 +1767,65 @@ namespace Shelf_Register
             Task.Run(() => ApiRFIDtoJan()).Wait();
             Task.Run(() => ApiGetDataFromBQ()).Wait();
             wait.Visible = false;
-            Task.Run(() => ApiGetImage()).Wait();
-            updateView();
+            //Fix 1110
+            //Task.Run(() => ApiGetImage()).Wait();
+            
+
+            //NEW
+            string image = "";
+            Task<string> result = Task.Run(() => ApiGetImageLocal_ForGrid(Session.barcode));
+            image = result.Result;
+            string temp;
+            temp = image == null ? "noimage.png" : image;
+
+            if (temp == "")
+            {
+                temp = "noimage.png";
+            }
+
+             Session.product.link_image = temp;
+
+
+
+
+
+                if (CheckValidUrl(temp))
+            {
+                pictureBox.Load(temp);
+            }
+            else
+            {
+                Image base64_convert = LoadImage(temp);
+                Bitmap objBitmap = new Bitmap(base64_convert, new Size(220, 300));
+                var bmp = (Bitmap)base64_convert;
+                pictureBox.Image = objBitmap;
+
+                }
+
+
+
+
+
+                updateView();
+
             } else
             {
                 Console.WriteLine("Duplicate");
             }
 
 
+        }
+
+        public static string Base64Encode(string plainText)
+        {
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return System.Convert.ToBase64String(plainTextBytes);
+        }
+
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
         }
 
         public class ProductData
@@ -4151,6 +4205,7 @@ namespace Shelf_Register
         private void pictureBox_Click(object sender, EventArgs e)
         {
 
+
                 PictureBox choosingImage = sender as PictureBox;
                 ProductPos temp = new ProductPos();
                 ProductPos data = new ProductPos               
@@ -4313,7 +4368,10 @@ namespace Shelf_Register
                             //Load data from panel to screen 
                             if (Session.product.link_image != "")
                             {
-                                choosingImage.Load(Session.product.link_image);
+                                // Check base64
+                                string url = GetImage(Session.product.link_image, Session.rfidcode);
+                                Session.product.link_image = url;
+                                choosingImage.Load(url);
                                 Session.productPos[choosingImage.Name] = data;
                                 lastChoose = choosingImage;
                             }
@@ -4367,7 +4425,10 @@ namespace Shelf_Register
 
                         if (Session.product.link_image != "")
                         {
-                            choosingImage.Load(Session.product.link_image);
+                            //Check base64
+                            string url = GetImage(Session.product.link_image, Session.rfidcode);
+                            Session.product.link_image = url;
+                            choosingImage.Load(url);
                             Session.productPos[choosingImage.Name] = data;
                             lastChoose = choosingImage;
                         }
@@ -4446,15 +4507,22 @@ namespace Shelf_Register
                     {
                         // WORKING HERE 
                         // IF EXIST TEMP! FIXING BUG HERE
-                        if (CheckValidUrl(Session.productPos["temp"].link_image))
-                        {
-                            Session.productPos[choosingImage.Name] = Session.productPos["temp"];
-                        }
-                        else
-                        {
-                            Image base64_convert = LoadImage(Session.productPos["temp"].link_image);
-                            choosingImage.Image = base64_convert;
-                        }
+
+                        //Fix 1110
+                        //if (CheckValidUrl(Session.productPos["temp"].link_image))
+                        //{
+                        //    Session.productPos[choosingImage.Name] = Session.productPos["temp"];
+
+                        //}
+                        //else
+                        //{
+                        //    Image base64_convert = LoadImage(Session.productPos["temp"].link_image);
+                        //    choosingImage.Image = base64_convert;
+                        //}
+
+                        string url = GetImage(Session.product.link_image, Session.rfidcode);
+                        Session.product.link_image = url;
+                        choosingImage.Load(url);
 
                         //Continue handle duplicate image
                         Session.productPos["temp"].picture_box.Load("blank_background.png");

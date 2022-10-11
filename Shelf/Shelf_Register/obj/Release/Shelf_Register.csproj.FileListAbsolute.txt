@@ -280,3 +280,4 @@ C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.exe
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.pdb
 C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\obj\Release\Shelf_Register.csproj.AssemblyReference.cache
+C:\Users\Tony\Desktop\Bugging\DevOps-Api-Server\Shelf\Shelf_Register\bin\Release\KILL_CONFIG.INI
