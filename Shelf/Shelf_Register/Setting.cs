@@ -333,8 +333,8 @@ namespace Shelf_Register
                }
                else
                 {
-                    scan_col_start = left_col;
 
+                    scan_col_start = right_col;
                 }
                 
             }
@@ -346,7 +346,7 @@ namespace Shelf_Register
                 }
                 else
                 {
-                    scan_col_start = right_col;
+                    scan_col_start = left_col;
                 }
                 
             }
