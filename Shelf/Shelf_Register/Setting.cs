@@ -583,12 +583,13 @@ namespace Shelf_Register
             }
         }
 
-        private async Task ApiLoadPositionMSTAntena(string nameOfShelf)
+        private async Task<bool> ApiLoadPositionMSTAntena(string nameOfShelf)
         {
             try
             {
                 Session.antenaLoadList = new List<CheckBox>();
                 Session.settingPosition = new List<SettingAntena>();
+                Session.antenaNoList = new List<string>();
                 HttpClient api_client = new HttpClient();
                 api_client.BaseAddress = new Uri(Session.address_api);
                 api_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -612,7 +613,7 @@ namespace Shelf_Register
                         int col_api = Int32.Parse(item["scan_col_start"].ToString());
                         string antenaIndex = (string)item["antena_index"];
                         string antenaNo = (string)item["antena_no"];
-
+                        Session.antenaNoList.Add(antenaIndex + "," + antenaNo);
                         Session.settingPosition.Add(new SettingAntena { row = row_api, col = col_api });
 
                         foreach (CheckBox checkItem in settingLayer.Controls.OfType<CheckBox>())
@@ -623,8 +624,8 @@ namespace Shelf_Register
                             }
 
                         }
+                        
 
-                        Session.antenaNoList.Add(antenaIndex +"," + antenaNo);
 
                         //foreach (TextBox antenaNoAPI in settingLayer.Controls.OfType<TextBox>())
                         //{
@@ -637,17 +638,21 @@ namespace Shelf_Register
 
 
 
+
                     }
+                    return true;
                 }
                 else
-                {
+                {                   
                     Console.WriteLine(result);
+                    return false;
                 }
 
             }
             catch (Exception)
             {
                 Console.WriteLine("Failed to load table MST Antena - ApiLoadPositionMSTAntena \n");
+                return false;
             }
         }
 
@@ -1041,9 +1046,18 @@ namespace Shelf_Register
         {
             reset();
             Session.isLoadSetting = true;
-            Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
-            LoadDataToScreen();
-            DialogResult confirmResult = MessageBox.Show("Finish load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+            //Task.Run(() => ApiLoadPositionMSTAntena(Session.nameOfShelf).Wait());
+
+            Task<bool> result = Task.Run(() => ApiLoadPositionMSTAntena((Session.nameOfShelf)));
+            bool isSuccess = result.Result;
+            if (isSuccess)
+            {
+                LoadDataToScreen();
+                DialogResult confirmResult = MessageBox.Show("Finish load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+            } else
+            {
+                DialogResult confirmResult = MessageBox.Show("Failed load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+            }
             Session.isLoadSetting = false;
 
         }
