@@ -1725,7 +1725,7 @@ namespace Shelf_Register
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            DialogResult warningPopUp = MessageBox.Show("All data added, deleted, edited in the interface will be removed, are you sure?", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            DialogResult warningPopUp = MessageBox.Show("All data added, deleted, edited in the interface will be removed, are you sure?", "確認ダイアログ", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (warningPopUp == DialogResult.Yes)
             {
                 cbShelf.Text = "";
@@ -4506,7 +4506,7 @@ namespace Shelf_Register
             PictureBox deleteImage = sender as PictureBox;
             if (deleteImage.ImageLocation != "blank_background.png")
             {
-                DialogResult confirmResult = MessageBox.Show("Are you sure want to delete this", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                DialogResult confirmResult = MessageBox.Show("これを削除してもよろしいですか", "確認ダイアログ", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
 
                 if (confirmResult == DialogResult.Yes)
                 {
@@ -4559,11 +4559,11 @@ namespace Shelf_Register
             //Session.productPos.Keys.ToList().ForEach(x => Console.WriteLine("Data is " + x.ToString()+ (Session.productPos[x] as ProductPos).Jancode));
             if (cbShelf.Text == "")
             {
-                DialogResult infoPopUp = MessageBox.Show("Missing data in shelf name field, please input or choose!", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult infoPopUp = MessageBox.Show("棚名フィールドにデータがありません。入力または選択してください!", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else 
             { 
-            DialogResult warningPopUp = MessageBox.Show("If this shelf contains other shelf's RFID codes, the other shelf's RFID codes will be deleted, are you sure register?", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            DialogResult warningPopUp = MessageBox.Show("この棚に他の棚の RFID コードが含まれている場合、他の棚の RFID コードは削除されます。登録してもよろしいですか？", "確認ダイアログ", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
                 if (warningPopUp == DialogResult.Yes)
                 {
                     Console.WriteLine(Session.productPos);
@@ -4574,7 +4574,7 @@ namespace Shelf_Register
                     Task.Run(() => ApiSetSmartShelfSetting(shelfName)).Wait();
                     messageFromApp.Text += DateTime.Now.ToString("hh:mm:ss ") + api_message + "\n";
                     wait.Visible = false;
-                    DialogResult confirmResult = MessageBox.Show(api_message, "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                    DialogResult confirmResult = MessageBox.Show(api_message, "結果", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
                 }
             }
 

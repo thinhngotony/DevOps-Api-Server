@@ -479,11 +479,11 @@ namespace Shelf_Register
                     }
 
                 }
-                DialogResult confirmResult = MessageBox.Show("Finish register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                DialogResult confirmResult = MessageBox.Show("登録完了", "結果", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
 
             } else
             {
-                DialogResult confirmResult = MessageBox.Show("Failed to register MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                DialogResult confirmResult = MessageBox.Show("登録失敗", "結果", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
             }
 
@@ -1007,7 +1007,7 @@ namespace Shelf_Register
 
         private void btnClearOnClick(object sender, EventArgs e)
         {
-            DialogResult warningPopUp = MessageBox.Show("All data on screen will be removed, are you sure?", "Confirm Diaglog", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            DialogResult warningPopUp = MessageBox.Show("画面上のすべてのデータが削除されます。よろしいですか?", "確認ダイアログ", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (warningPopUp == DialogResult.Yes)
             {
                 reset();
@@ -1053,10 +1053,10 @@ namespace Shelf_Register
             if (isSuccess)
             {
                 LoadDataToScreen();
-                DialogResult confirmResult = MessageBox.Show("Finish load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                DialogResult confirmResult = MessageBox.Show("データを正常にロード", "結果", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
             } else
             {
-                DialogResult confirmResult = MessageBox.Show("Failed load MST Antena table", "Result", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                DialogResult confirmResult = MessageBox.Show("データの読み込みに失敗しました", "結果", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
             }
             Session.isLoadSetting = false;
 
