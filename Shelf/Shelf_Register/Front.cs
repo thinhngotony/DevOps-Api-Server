@@ -5099,108 +5099,111 @@ namespace Shelf_Register
 
         private void All_txt_click(object sender, EventArgs e)
         {
-            //if (Session.scan_mode == true) 
-            //{ 
-            TextBox txtBox_Items = (TextBox)sender;
-            string shelfName = cbShelf.Text;
-            int row = (int)Int64.Parse(txtBox_Items.Name.Substring(8, 1));
-            int col = (int)Int64.Parse(txtBox_Items.Name.Substring(10, 1));
-            Task <JObject> getData = Task.Run(()=>ApiGetSmartShelfLocationByCol(shelfName, col, row ));
-            JObject JsonData = getData.Result;
-
-            DataTable dt = new DataTable();
-            DataColumn dc = new DataColumn();
-
-            //dt.Columns.Add("link_image");
-            dt.Columns.Add(new DataColumn("link_image", typeof(Bitmap)));
-            dt.Columns.Add("jancode");
-            dt.Columns.Add("product_name");
-            dt.Columns.Add("EPC");
-
-            DataRow NewRow;
-            DataGridView gridView = new DataGridView();
-
-            //gridView.modf(gridView.detailData);
-            foreach (var item in JsonData["data"])
+            if (btnLoad.BackColor != Color.ForestGreen)
             {
+                TextBox txtBox_Items = (TextBox)sender;
+                string shelfName = cbShelf.Text;
+                int row = (int)Int64.Parse(txtBox_Items.Name.Substring(8, 1));
+                int col = (int)Int64.Parse(txtBox_Items.Name.Substring(10, 1));
+                Task<JObject> getData = Task.Run(() => ApiGetSmartShelfLocationByCol(shelfName, col, row));
+                JObject JsonData = getData.Result;
 
-                //IMPORTANCE: GET DATA FROM BQ
-                //=======================================================================================//
-                Task<string> jan_task =  Task.Run(() => ApiRFIDtoJan_Scan((string)item["EPC"]));
-                string  jan_result =  jan_task.Result;
-                ShelfProduct productLocal = ShelfLocal.getProductByRFID((string)item["EPC"], Session.dataListLocal);
-                string image = "";
-                string product_name_bq_result = "";
-                string isbn_bq_result = "";
+                DataTable dt = new DataTable();
+                DataColumn dc = new DataColumn();
 
-                if (productLocal!=null) 
-                {
-                    image = productLocal.path_img;
-                    product_name_bq_result = productLocal.goods_name;
-                    isbn_bq_result = productLocal.jancode;
-                }
-                else 
-                {
-                   Task<(string, string, string)> bq_task = Task.Run(() => ApiGetDataFromBQ_Sync((string)item["EPC"], jan_result));
-                   product_name_bq_result = bq_task.Result.Item2;
-                   isbn_bq_result = bq_task.Result.Item3;
-                   Task<string> image_task = Task.Run(() => ApiGetImageLocal_ForGrid(isbn_bq_result));
-                   image = image_task.Result;
-                }               
+                //dt.Columns.Add("link_image");
+                dt.Columns.Add(new DataColumn("link_image", typeof(Bitmap)));
+                dt.Columns.Add("jancode");
+                dt.Columns.Add("product_name");
+                dt.Columns.Add("EPC");
 
-                NewRow = dt.NewRow();
-                string temp;
-                temp = image == null ? "noimage.png" : image;
-                if (temp == "")
-                {
-                    temp = "noimage.png";
-                }
+                DataRow NewRow;
+                DataGridView gridView = new DataGridView();
 
-                if (CheckValidUrl(temp))
+                //gridView.modf(gridView.detailData);
+                foreach (var item in JsonData["data"])
                 {
-                        pictureBox.Load(temp);
+
+                    //IMPORTANCE: GET DATA FROM BQ
+                    //=======================================================================================//
+                    Task<string> jan_task = Task.Run(() => ApiRFIDtoJan_Scan((string)item["EPC"]));
+                    string jan_result = jan_task.Result;
+                    ShelfProduct productLocal = ShelfLocal.getProductByRFID((string)item["EPC"], Session.dataListLocal);
+                    string image = "";
+                    string product_name_bq_result = "";
+                    string isbn_bq_result = "";
+
+                    if (productLocal != null)
+                    {
+                        image = productLocal.path_img;
+                        product_name_bq_result = productLocal.goods_name;
+                        isbn_bq_result = productLocal.jancode;
+                    }
+                    else
+                    {
+                        Task<(string, string, string)> bq_task = Task.Run(() => ApiGetDataFromBQ_Sync((string)item["EPC"], jan_result));
+                        product_name_bq_result = bq_task.Result.Item2;
+                        isbn_bq_result = bq_task.Result.Item3;
+                        Task<string> image_task = Task.Run(() => ApiGetImageLocal_ForGrid(isbn_bq_result));
+                        image = image_task.Result;
+                    }
+
+                    NewRow = dt.NewRow();
+                    string temp;
+                    temp = image == null ? "noimage.png" : image;
+                    if (temp == "")
+                    {
+                        temp = "noimage.png";
+                    }
+
+                    if (CheckValidUrl(temp))
+                    {
+                        string url = GetImage(image, (string)item["EPC"]);
+                        Session.product.link_image = url;
+                        pictureBox.Load(url);
+                        //pictureBox.Load(temp);
                         var bmp = (Bitmap)pictureBox.Image;
                         Bitmap objBitmap = new Bitmap(bmp, new Size(220, 300));
                         NewRow[0] = objBitmap;
-                }
-                else
-                {
+                    }
+                    else
+                    {
 
-                    Image base64_convert = LoadImage(temp);
-                    Bitmap objBitmap = new Bitmap(base64_convert, new Size(220, 300));
-                    var bmp = (Bitmap)base64_convert;
-                    NewRow[0] = objBitmap;
-                }
-                
-                NewRow[1] = jan_result;
-                NewRow[2] = product_name_bq_result;
-                NewRow[3] = (string)item["EPC"];
-                dt.Rows.Add(NewRow);
+                        Image base64_convert = LoadImage(temp);
+                        Bitmap objBitmap = new Bitmap(base64_convert, new Size(220, 300));
+                        var bmp = (Bitmap)base64_convert;
+                        NewRow[0] = objBitmap;
+                    }
 
-                //IMPORTANCE: GET DATA DIRECT FROM DATABASE
-                //=======================================================================================//
-                //NewRow = dt.NewRow();
-                //string temp;
-                //temp = (string)item["link_image"] == null ? "noimage.png" : (string)item["link_image"];
-                //if (temp == "")
-                //{
-                //    temp = "noimage.png";
-                //}
-                //pictureBox.Load(temp);
-                //var bmp = (Bitmap)pictureBox.Image;
-                //NewRow[0] = bmp;
-                //NewRow[1] = (string)item["jancode"] == null ? "" : (string)item["jancode"];
-                //NewRow[2] = (string)item["product_name"] == null ? "" : (string)item["product_name"];
-                //NewRow[3] = (string)item["EPC"];
-                //dt.Rows.Add(NewRow);
-                //=======================================================================================//
+                    NewRow[1] = jan_result;
+                    NewRow[2] = product_name_bq_result;
+                    NewRow[3] = (string)item["EPC"];
+                    dt.Rows.Add(NewRow);
+
+                    //IMPORTANCE: GET DATA DIRECT FROM DATABASE
+                    //=======================================================================================//
+                    //NewRow = dt.NewRow();
+                    //string temp;
+                    //temp = (string)item["link_image"] == null ? "noimage.png" : (string)item["link_image"];
+                    //if (temp == "")
+                    //{
+                    //    temp = "noimage.png";
+                    //}
+                    //pictureBox.Load(temp);
+                    //var bmp = (Bitmap)pictureBox.Image;
+                    //NewRow[0] = bmp;
+                    //NewRow[1] = (string)item["jancode"] == null ? "" : (string)item["jancode"];
+                    //NewRow[2] = (string)item["product_name"] == null ? "" : (string)item["product_name"];
+                    //NewRow[3] = (string)item["EPC"];
+                    //dt.Rows.Add(NewRow);
+                    //=======================================================================================//
+
+                }
+                gridView.detailData.DataSource = dt;
+                gridView.Show();
+                gridView.detailData.ClearSelection();
 
             }
-            gridView.detailData.DataSource = dt;         
-            gridView.Show();
-            gridView.detailData.ClearSelection();
-            
-
 
         }
 
