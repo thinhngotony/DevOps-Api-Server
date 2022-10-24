@@ -1206,6 +1206,7 @@ func InsertPositionMSTAntena(db *sql.DB, reqBody Set_SmartShelf_Position_mst_ant
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 	stmt, err := db.PrepareContext(ctx, query)
+	fmt.Println(stmt)
 	if err != nil {
 		log.Printf("Error %s when preparing SQL statement", err)
 		return false, err
