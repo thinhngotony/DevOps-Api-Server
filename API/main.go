@@ -23,11 +23,11 @@ func main() {
 	r.POST("/api/v1/search_fromBQ", controllers.SearchFromJan_BQ)
 	r.POST("/api/v1/get_gate_setting", controllers.GetGateSetting)
 	r.POST("/api/v1/set_gate_setting", controllers.SetGateSetting)
-	r.POST("/api/v1/get_smart_self_setting", controllers.GetSmartSelfSetting)
-	r.POST("/api/v1/get_smart_self_names", controllers.GetShelfNames)
-	r.POST("/api/v1/set_smart_self_setting", controllers.SetSmartSelfSetting)
+	r.POST("/api/v1/get_smart_shelf_setting", controllers.GetSmartSelfSetting)
+	r.POST("/api/v1/get_smart_shelf_names", controllers.GetShelfNames)
+	r.POST("/api/v1/set_smart_shelf_setting", controllers.SetSmartSelfSetting)
 	r.POST("/api/v1/rfid_to_info", controllers.GetInfofromRFID)
-	r.POST("/api/v1/rfid_to_status_smartself", controllers.GetSmartSelfLogSetting)
+	r.POST("/api/v1/rfid_to_status_smartshelf", controllers.GetSmartSelfLogSetting)
 
 	// New Transactions
 	r.POST("/api/v1/insert_transaction", controllers.InsertDataToTransactionTable)
@@ -45,9 +45,9 @@ func main() {
 	//New SmartShelf
 	r.POST("/api/v1/clear_raw_data", controllers.ClearRawData)
 	r.POST("/api/v1/reset_smartself", controllers.SetSmartSelfLocation)
-	r.POST("/api/v1/insert_more_info_smartself", controllers.SetSmartSelfMoreInfo)
-	r.POST("/api/v1/get_smartself_location", controllers.GetSmartSelfLocation)
-	r.POST("/api/v1/get_smartself_location_by_col", controllers.GetSmartSelfLocationByCol)
+	r.POST("/api/v1/insert_more_info_smartshelf", controllers.SetSmartSelfMoreInfo)
+	r.POST("/api/v1/get_smartshelf_location", controllers.GetSmartSelfLocation)
+	r.POST("/api/v1/get_smartshelf_location_by_col", controllers.GetSmartSelfLocationByCol)
 
 	//Test function
 	r.POST("/api/v1/set_image", controllers.EncodeImage)

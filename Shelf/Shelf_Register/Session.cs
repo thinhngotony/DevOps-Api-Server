@@ -33,15 +33,15 @@ namespace Shelf_Register
         public static string image_api_local = "";
         public static string image_api = "";
         public static string image_sub = "";
-        public static string sub_set_smart_self_setting = "";
-        public static string sub_get_smart_self_setting = "";
-        public static string sub_rfid_to_status_smart_self = "";
-        public static string sub_get_smart_self_names = "";
+        public static string set_smart_shelf_setting = "";
+        public static string get_smart_shelf_setting = "";
+        public static string rfid_to_status_smartshelf = "";
+        public static string get_smart_shelf_names = "";
         public static string sub_reset_smartshelf = "";
         public static string sub_clear_raw_data = "";
-        public static string insert_more_info_smartself = "";
-        public static string sub_get_smartshelf_location = "";
-        public static string get_smartself_location_by_col = "";
+        public static string insert_more_info_smartshelf = "";
+        public static string get_smartshelf_location = "";
+        public static string get_smartshelf_location_by_col = "";
         public static string bquery_api = "";
         public static string bquery_sub = "";
         public static string api_key = "";
@@ -146,6 +146,7 @@ namespace Shelf_Register
 
         public static bool isLoadSetting = false;
 
+        public static string antenaPower = "";
 
 
 

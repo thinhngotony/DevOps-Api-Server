@@ -4,7 +4,6 @@ using SuperSimpleTcp;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -18,7 +17,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using KillProcessRFID;
 
 namespace Shelf_Register
 {
@@ -39,7 +37,7 @@ namespace Shelf_Register
             this.StartPosition = FormStartPosition.Manual;
             this.CenterToScreen();
 
-            KillProcessRFID.ControlKill.KillRFIDProcess_diffCurrent();
+            //KillProcessRFID.ControlKill.KillRFIDProcess_diffCurrent();
             init();
             Session.front = this;
             txtRfid.Text = Session.rfidcode;
@@ -53,15 +51,15 @@ namespace Shelf_Register
             Dictionary<string, string> dataInFile = getDictionaryConfig("SMART_SHELF_CONFIG.ini");
             Session.api_key = dataInFile["api_key"];
             Session.address_api = dataInFile["address_api"];
-            Session.sub_set_smart_self_setting = dataInFile["sub_set_smart_self_setting"];
-            Session.sub_get_smart_self_setting = dataInFile["sub_get_smart_self_setting"];
-            Session.sub_get_smart_self_names = dataInFile["sub_get_smart_self_names"];
+            Session.set_smart_shelf_setting = dataInFile["set_smart_shelf_setting"];
+            Session.get_smart_shelf_setting = dataInFile["get_smart_shelf_setting"];
+            Session.get_smart_shelf_names = dataInFile["get_smart_shelf_names"];
             Session.sub_reset_smartshelf = dataInFile["sub_reset_smartshelf"];
             Session.sub_clear_raw_data = dataInFile["sub_clear_raw_data"];
-            Session.sub_get_smartshelf_location = dataInFile["sub_get_smartshelf_location"];
-            Session.get_smartself_location_by_col = dataInFile["get_smartself_location_by_col"];
+            Session.get_smartshelf_location = dataInFile["get_smartshelf_location"];
+            Session.get_smartshelf_location_by_col = dataInFile["get_smartshelf_location_by_col"];
             Session.rfmaster_sub_rfids_to_jans = dataInFile["sub_url_rfid_to_jan"];
-            Session.insert_more_info_smartself = dataInFile["insert_more_info_smartself"];
+            Session.insert_more_info_smartshelf = dataInFile["insert_more_info_smartshelf"];
             Session.image_api = dataInFile["image_api"];
             Session.image_api_local = dataInFile["image_api_local"];
             Session.bquery_api = dataInFile["bquery_api"];
@@ -70,7 +68,7 @@ namespace Shelf_Register
             Session.rT = (int)Int64.Parse(dataInFile["rT"]);
             Session.time_check = (int)Int64.Parse(dataInFile["check_interval_miliseconds"]) / 1000;
             Session.JanLen = (int)Int64.Parse(dataInFile["JanLen"]);
-            Session.sub_rfid_to_status_smart_self = dataInFile["sub_rfid_to_status_smart_self"];
+            Session.rfid_to_status_smartshelf = dataInFile["rfid_to_status_smartshelf"];
             string temp = dataInFile["TcpShelfHost"];
             Session.TcpShelfHost_Dictionary = ReadTcpHosts(temp);
             Session.time_set_location = (int)Int64.Parse(dataInFile["setlocation_interval_miliseconds"]) / 1000;
@@ -78,6 +76,14 @@ namespace Shelf_Register
             Session.clear_position_mst_antena = dataInFile["clear_position_mst_antena"];
             Session.load_position_mst_antena = dataInFile["load_position_mst_antena"];
 
+            Dictionary<string, string> dataSetPower = getDictionaryConfig("PowerSetting.ini");
+            List<string> keyList = new List<string>(dataSetPower.Values);
+            Session.antenaPower = String.Join(",", keyList.ToArray());
+
+            //Session.antenaPower = keyList.ToString();
+            //Console.WriteLine(Session.antenaPower);
+
+            
 
 
 
@@ -119,8 +125,9 @@ namespace Shelf_Register
             }
             else
             {
-                messageFromApp.Text += "Can't find IP for TcpHosts";
+                messageFromApp.Text += DateTime.Now.ToString("hh:mm:ss") + ": Can't find IP for TcpHosts \n";
             }
+
 
         }
 
@@ -981,7 +988,7 @@ namespace Shelf_Register
                     }
 
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var result = await api_client.PostAsync(Session.sub_set_smart_self_setting, content);
+                    var result = await api_client.PostAsync(Session.set_smart_shelf_setting, content);
 
 
                     if (result.IsSuccessStatusCode)
@@ -1044,7 +1051,7 @@ namespace Shelf_Register
 
 
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var result = await api_client.PostAsync(Session.insert_more_info_smartself, content);
+                    var result = await api_client.PostAsync(Session.insert_more_info_smartshelf, content);
 
 
                     if (result.IsSuccessStatusCode)
@@ -1135,7 +1142,7 @@ namespace Shelf_Register
                     dpp_shelf_name = dpp_shelf_name
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var result = await api_client.PostAsync(Session.sub_get_smart_self_setting, content);
+                var result = await api_client.PostAsync(Session.get_smart_shelf_setting, content);
 
                 if (result.IsSuccessStatusCode)
                 {
@@ -1227,7 +1234,7 @@ namespace Shelf_Register
                     shelf_no = dpp_shelf_name
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var result = await api_client.PostAsync(Session.sub_get_smartshelf_location, content);
+                var result = await api_client.PostAsync(Session.get_smartshelf_location, content);
 
                 if (result.IsSuccessStatusCode)
                 {
@@ -1286,7 +1293,7 @@ namespace Shelf_Register
                     row = row
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var result = await api_client.PostAsync(Session.get_smartself_location_by_col, content);
+                var result = await api_client.PostAsync(Session.get_smartshelf_location_by_col, content);
 
                 if (result.IsSuccessStatusCode)
                 {
@@ -1329,7 +1336,7 @@ namespace Shelf_Register
                     rfid = rfid
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var result = await api_client.PostAsync(Session.sub_rfid_to_status_smart_self, content);
+                var result = await api_client.PostAsync(Session.rfid_to_status_smartshelf, content);
 
 
                 if (result.IsSuccessStatusCode)
@@ -1370,7 +1377,7 @@ namespace Shelf_Register
                     api_key = Session.api_key
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var result = await api_client.PostAsync(Session.sub_get_smart_self_names, content);
+                var result = await api_client.PostAsync(Session.get_smart_shelf_names, content);
 
                 if (result.IsSuccessStatusCode)
                 {
@@ -1681,6 +1688,7 @@ namespace Shelf_Register
                     int n = opos.OPOS_EnableDevice(Session.OPOSRFID1);
                     if (n == -1)
                     {
+                        opos.setAtenaPower(Session.OPOSRFID1, Session.antenaPower);
                         opos.OPOS_StartReading(Session.OPOSRFID1);
                         //opos.OPOS_readSingleTag(Session.OPOSRFID1);
                         btnConnect.Text = "StopReading";
@@ -2163,6 +2171,26 @@ namespace Shelf_Register
                 OPOSRFID1.DeviceEnabled = true;
             }
 
+            // New range for power
+            public void setAtenaPower(AxOPOSRFID OPOSRFID1, string strCSV)
+            {
+                //string strCSV = "";
+                int lData;
+
+                int lRet;
+                OPOSRFID1.BinaryConversion = OposStatus.OposBcNone;
+
+                lData = 2;
+                lRet = OPOSRFID1.DirectIO(120, ref lData, ref strCSV);
+
+
+                if (lRet != OposStatus.OposSuccess)
+                {
+                    Console.WriteLine("Setting atena power is failed!");
+                }
+
+                OPOSRFID1.BinaryConversion = OposStatus.OposBcNibble;
+            }
 
 
 
@@ -4865,6 +4893,7 @@ namespace Shelf_Register
                     //multiConnections.Events.DataSent += Events_DataSent;
                     multiConnections.Connect();
                     multiConnections.Send("ACTION_REGISTER_SHELF_END");
+                    Thread.Sleep(50);
                     multiConnections.Send("ACTION_REGISTER_SHELF_START");
                     connectedTcpHosts.Add(multiConnections);
                     

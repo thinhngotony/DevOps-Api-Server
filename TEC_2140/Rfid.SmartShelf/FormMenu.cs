@@ -1230,7 +1230,7 @@ namespace Vjp.Rfid.SmartShelf
         private string ConvertAntenNo(string value)
         {
             string[] data = ConfigFile.AntenaList.Split(',');
-            for (int i = 0; i <= Int64.Parse(ConfigFile.NumberOfAntena); i++)
+            for (int i = 0; i < Int64.Parse(ConfigFile.NumberOfAntena); i++)
             {
                 string data_antena = data[i].Split(':').First();
                 if (value == data_antena)
