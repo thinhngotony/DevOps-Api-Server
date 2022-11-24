@@ -143,11 +143,13 @@ namespace Shelf_Register
         //public static List<TextBox> antenaNoList = new List<TextBox>();
         public static List<string> antenaNoList = new List<string>();
         public static List<SettingAntena> settingPosition = new List<SettingAntena>();
-
         public static bool isLoadSetting = false;
-
         public static string antenaPower = "";
 
+
+        // Add new feature 
+        public static List<string> rfidRead = new List<string>();
+        public static string lastRfidRead = "";
 
 
 

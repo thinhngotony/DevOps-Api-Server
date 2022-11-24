@@ -69,8 +69,7 @@ namespace Shelf_Register
             Session.time_check = (int)Int64.Parse(dataInFile["check_interval_miliseconds"]) / 1000;
             Session.JanLen = (int)Int64.Parse(dataInFile["JanLen"]);
             Session.rfid_to_status_smartshelf = dataInFile["rfid_to_status_smartshelf"];
-            string temp = dataInFile["TcpShelfHost"];
-            Session.TcpShelfHost_Dictionary = ReadTcpHosts(temp);
+            Session.TcpShelfHost_Dictionary = ReadTcpHosts(dataInFile["TcpShelfHost"]);
             Session.time_set_location = (int)Int64.Parse(dataInFile["setlocation_interval_miliseconds"]) / 1000;
             Session.update_position_mst_antena = dataInFile["update_position_mst_antena"];
             Session.clear_position_mst_antena = dataInFile["clear_position_mst_antena"];
@@ -92,6 +91,7 @@ namespace Shelf_Register
                 pictureBox_Items.SizeMode = PictureBoxSizeMode.StretchImage;
                 pictureBox_Items.Load("blank_background.png");
             }
+            pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox.Load("blank_background.png");
 
             Task.Run(() => ApiGetSmartShelfNames()).Wait();
@@ -159,6 +159,8 @@ namespace Shelf_Register
             txtJan.Text = Session.barcode;
             txtRfid.Text = Session.rfidcode;
             txtName.Text = Session.product.goods_name;
+            Session.lastRfidRead = txtRfid.Text;
+
         }
 
         public void updateName()
@@ -1731,7 +1733,7 @@ namespace Shelf_Register
             }
             btnConnect.Enabled = true;
         }
-
+         
 
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -1769,6 +1771,8 @@ namespace Shelf_Register
 
         private void txtRfid_TextChanged(object sender, EventArgs e)
         {
+
+
             if (txtRfid.Text != rfid_cd) { 
             Wait wait = new Wait();
             wait.Visible = true;
@@ -4208,18 +4212,6 @@ namespace Shelf_Register
             public const int RfidRtIdPartialUserData = 0x12; // Read the ID and 
         }
 
-
-        private void label9_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
             // set the current caret position to the end
@@ -4474,27 +4466,11 @@ namespace Shelf_Register
                 else if (choosingImage.ImageLocation == "blank_background.png")
                 {
                     // WORKING HERE 
-                    // IF EXIST TEMP!
-                    //Handling
-
-
-                    //if (!isBase64(Session.productPos["temp"].link_image))
-                    //{
-                    //    choosingImage.Load(Session.productPos["temp"].link_image);
-                    //}
-                    //else
-                    //{
-                    //    Image base64_convert = LoadImage(Session.productPos["temp"].link_image);
-                    //    choosingImage.Image = base64_convert;
-                    //}
-                  
+                    // IF EXIST TEMP!               
                     choosingImage.Load(Session.productPos["temp"].link_image);
-
                     Session.productPos[choosingImage.Name] = Session.productPos["temp"];
-
                     //Continue handle duplicate image
                     Session.productPos["temp"].picture_box.Load("blank_background.png");
-
                     ////Load black screen for last choose
                     if (btnCheck.BackColor == Color.ForestGreen)
                     {
@@ -4534,20 +4510,7 @@ namespace Shelf_Register
                     if (choosingImage.ImageLocation == "blank_background.png")
                     {
                         // WORKING HERE 
-                        // IF EXIST TEMP! FIXING BUG HERE
-
-                        //Fix 1110
-                        //if (CheckValidUrl(Session.productPos["temp"].link_image))
-                        //{
-                        //    Session.productPos[choosingImage.Name] = Session.productPos["temp"];
-
-                        //}
-                        //else
-                        //{
-                        //    Image base64_convert = LoadImage(Session.productPos["temp"].link_image);
-                        //    choosingImage.Image = base64_convert;
-                        //}
-
+                        // IF EXIST TEMP
                         string url = GetImage(Session.product.link_image, Session.rfidcode);
                         Session.product.link_image = url;
                         choosingImage.Load(url);
@@ -4589,8 +4552,7 @@ namespace Shelf_Register
                         updatePictureBox();
                     } else
                     {
-
-                        Console.WriteLine("Chua handle");
+                        Console.WriteLine("Not handle");
                     }
 
                     }
@@ -4625,29 +4587,8 @@ namespace Shelf_Register
             {
                 Console.WriteLine("Nothing to delete");
             }
-
-
-
         }
 
-        private void lJan_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lRfid_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox_Click_2(object sender, EventArgs e)
-        {
-        }
 
         private void btnRegister_Click(object sender, EventArgs e)
         {
@@ -4676,16 +4617,6 @@ namespace Shelf_Register
 
         }
 
-        private void txtShelf_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void txtScanner_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void btnLoad_Click(object sender, EventArgs e)
         {
 
@@ -4705,7 +4636,6 @@ namespace Shelf_Register
                 btnCheck.Text = "CHECK";
                 btnCheck.BackColor = Color.RoyalBlue;
                 checkTimer.Stop();
-
                 btnScan.Text = "SCAN";
                 btnScan.BackColor = Color.RoyalBlue;
                 locationTimer.Stop();
@@ -4756,7 +4686,6 @@ namespace Shelf_Register
                 wait.Visible = false;
                 btnCheck.BackColor = Color.ForestGreen;
 
-
                 if (btnLoad.BackColor == Color.ForestGreen || btnScan.BackColor == Color.ForestGreen)
                 {
                     btnLoad.BackColor = Color.RoyalBlue;
@@ -4764,7 +4693,6 @@ namespace Shelf_Register
                     btnScan.Text = "SCAN";
                     btnScan.BackColor = Color.RoyalBlue;
                     locationTimer.Stop();
-
                 }
                 checkTimer.Start();
             }
@@ -4802,28 +4730,6 @@ namespace Shelf_Register
             }
         }
 
-        private void pictureBox_Paint(object sender, PaintEventArgs e)
-        {
-            //foreach (string key in Session.productPos.Keys)
-            //{
-            //    if (Session.productPos[key].RFIDcode != "") { 
-            //    using (Font myFont = new Font("Arial", 10))
-            //    {
-            //        e.Graphics.DrawString(Session.productPos[key].product_name, myFont, Brushes.Green, new Point(2, 2));
-            //    }
-            //    }
-            //}
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Front_Load_1(object sender, EventArgs e)
-        {
-
-        }
 
         private void Front_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -5010,34 +4916,16 @@ namespace Shelf_Register
                 //Send stop singal here => Need Handle exeption when not connect
                 Wait wait = new Wait();
                 wait.Visible = true;
-
-
-                //OLD DISCONNECT - BUG
-                //int temp = Session.TcpHost.Count();
-                //for (int i = 0; i < temp; i++)
-                //{
-                //    if (connectedTcpHosts[i].IsConnected)
-                //    {
-                //        connectedTcpHosts[i].Send("ACTION_REGISTER_SHELF_END");
-                //        connectedTcpHosts[i].Disconnect();
-                //        messageFromApp.Text += String.Format("{0} Stop shelf {1} complete \n", DateTime.Now.ToString("hh:mm:ss "), connectedTcpHosts[i].ServerIpPort);
-                //    }
-
-                //}
                 bool result = CloseConnect();
 
                 if (result == true)
                 {
                     messageFromApp.Text += String.Format("{0}Stop shelf complete \n", DateTime.Now.ToString("hh:mm:ss "));
-
                 }
                 else
                 {
                     messageFromApp.Text += String.Format("{0}Failed to stop shelf \n", DateTime.Now.ToString("hh:mm:ss "));
-
                 }
-
-
                 locationTimer.Stop();
                 btnScan.Text = "SCAN";
                 btnScan.BackColor = Color.RoyalBlue;
@@ -5075,17 +4963,12 @@ namespace Shelf_Register
 
 
                 }
-                //Check bug
                 updateView();
                 //Insert data got
                 Task.Run(() => ApiInsertMoreInfoSmartShelf()).Wait();
                 //Reload data to screen
                 //Task.Run(() => ApiGetSmartShelfLocation(shelfName)).Wait(); //Get RFID row col link image, pro....
-
-                //Check bug updateView 2 lần
                 updateView();
-                //Check bug
-
                 updatePictureBox();
                 updateName_Scan();
 
@@ -5136,7 +5019,6 @@ namespace Shelf_Register
                 int col = (int)Int64.Parse(txtBox_Items.Name.Substring(10, 1));
                 Task<JObject> getData = Task.Run(() => ApiGetSmartShelfLocationByCol(shelfName, col, row));
                 JObject JsonData = getData.Result;
-
                 DataTable dt = new DataTable();
                 DataColumn dc = new DataColumn();
 
@@ -5209,50 +5091,12 @@ namespace Shelf_Register
                     NewRow[3] = (string)item["EPC"];
                     dt.Rows.Add(NewRow);
 
-                    //IMPORTANCE: GET DATA DIRECT FROM DATABASE
-                    //=======================================================================================//
-                    //NewRow = dt.NewRow();
-                    //string temp;
-                    //temp = (string)item["link_image"] == null ? "noimage.png" : (string)item["link_image"];
-                    //if (temp == "")
-                    //{
-                    //    temp = "noimage.png";
-                    //}
-                    //pictureBox.Load(temp);
-                    //var bmp = (Bitmap)pictureBox.Image;
-                    //NewRow[0] = bmp;
-                    //NewRow[1] = (string)item["jancode"] == null ? "" : (string)item["jancode"];
-                    //NewRow[2] = (string)item["product_name"] == null ? "" : (string)item["product_name"];
-                    //NewRow[3] = (string)item["EPC"];
-                    //dt.Rows.Add(NewRow);
-                    //=======================================================================================//
-
                 }
                 gridView.detailData.DataSource = dt;
                 gridView.Show();
                 gridView.detailData.ClearSelection();
 
             }
-
-        }
-
-        private void textBox_1_1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_1_5_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_1_4_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_3_4_TextChanged(object sender, EventArgs e)
-        {
 
         }
 

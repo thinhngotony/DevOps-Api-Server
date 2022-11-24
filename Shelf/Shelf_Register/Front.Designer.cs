@@ -28,6 +28,7 @@ namespace Shelf_Register
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
+        /// 17112022
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
@@ -143,7 +144,6 @@ namespace Shelf_Register
             this.lJan.Size = new System.Drawing.Size(64, 13);
             this.lJan.TabIndex = 7;
             this.lJan.Text = "JANCODE";
-            this.lJan.Click += new System.EventHandler(this.lJan_Click);
             // 
             // txtJan
             // 
@@ -166,7 +166,6 @@ namespace Shelf_Register
             this.lRfid.Size = new System.Drawing.Size(36, 13);
             this.lRfid.TabIndex = 5;
             this.lRfid.Text = "RFID";
-            this.lRfid.Click += new System.EventHandler(this.lRfid_Click);
             // 
             // txtRfid
             // 
@@ -699,7 +698,6 @@ namespace Shelf_Register
             this.textBox_3_4.Size = new System.Drawing.Size(112, 43);
             this.textBox_3_4.TabIndex = 71;
             this.textBox_3_4.Click += new System.EventHandler(this.All_txt_click);
-            this.textBox_3_4.TextChanged += new System.EventHandler(this.textBox_3_4_TextChanged);
             // 
             // textBox_3_5
             // 
@@ -826,7 +824,6 @@ namespace Shelf_Register
             this.textBox_1_5.Size = new System.Drawing.Size(112, 43);
             this.textBox_1_5.TabIndex = 60;
             this.textBox_1_5.Click += new System.EventHandler(this.All_txt_click);
-            this.textBox_1_5.TextChanged += new System.EventHandler(this.textBox_1_5_TextChanged);
             // 
             // textBox_1_4
             // 
@@ -841,7 +838,6 @@ namespace Shelf_Register
             this.textBox_1_4.Size = new System.Drawing.Size(112, 43);
             this.textBox_1_4.TabIndex = 59;
             this.textBox_1_4.Click += new System.EventHandler(this.All_txt_click);
-            this.textBox_1_4.TextChanged += new System.EventHandler(this.textBox_1_4_TextChanged);
             // 
             // textBox_1_3
             // 
@@ -856,7 +852,6 @@ namespace Shelf_Register
             this.textBox_1_3.Size = new System.Drawing.Size(112, 43);
             this.textBox_1_3.TabIndex = 58;
             this.textBox_1_3.Click += new System.EventHandler(this.All_txt_click);
-            this.textBox_1_3.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // textBox_1_2
             // 
@@ -884,7 +879,6 @@ namespace Shelf_Register
             this.textBox_1_1.Size = new System.Drawing.Size(112, 43);
             this.textBox_1_1.TabIndex = 56;
             this.textBox_1_1.Click += new System.EventHandler(this.All_txt_click);
-            this.textBox_1_1.TextChanged += new System.EventHandler(this.textBox_1_1_TextChanged);
             // 
             // textBox_3_6
             // 
@@ -934,7 +928,6 @@ namespace Shelf_Register
             this.txtScanner.Size = new System.Drawing.Size(219, 25);
             this.txtScanner.TabIndex = 59;
             this.txtScanner.Text = " ";
-            this.txtScanner.TextChanged += new System.EventHandler(this.txtScanner_TextChanged);
             // 
             // label2
             // 
@@ -1143,7 +1136,6 @@ namespace Shelf_Register
             this.Name = "Front";
             this.Text = "  ";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Front_FormClosed);
-            this.Load += new System.EventHandler(this.Front_Load_1);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Front_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Front_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_1_1)).EndInit();
